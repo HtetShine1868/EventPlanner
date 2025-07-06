@@ -2,12 +2,16 @@ package com.project.EventPlanner.features.event.domain.model;
 
 import com.project.EventPlanner.features.user.domain.model.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "event")
 public class Event {
 
