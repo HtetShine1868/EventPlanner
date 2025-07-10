@@ -20,5 +20,7 @@ public class EventCategory {
     private String name;
 
     private String description;
+
+
 }
 

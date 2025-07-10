@@ -2,7 +2,7 @@ package com.project.EventPlanner.features.user.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;

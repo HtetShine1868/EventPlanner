@@ -23,6 +23,8 @@ public class OrganizerApplication {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    private String organizerName;
+
     @Column(nullable = false)
     private String status; // PENDING, APPROVED, REJECTED
 

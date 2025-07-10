@@ -1,9 +1,10 @@
 package com.project.EventPlanner.features.event.domain.model;
 
+import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.user.domain.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,13 @@ public class Event {
 
     @Column(nullable = false)
     private LocalDateTime endTime;
+
+    private Integer capacity;
+
+    private Integer registeredCount; // You can also compute this instead of storing
+
+    @Enumerated(EnumType.STRING)
+    private EventStatus status = EventStatus.PENDING;
 
     @ManyToOne
     @JoinColumn(name = "organizer_id")

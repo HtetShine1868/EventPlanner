@@ -1,0 +1,16 @@
+package com.project.EventPlanner.features.event.domain.repository;
+
+import com.project.EventPlanner.features.event.domain.model.Event;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+
+import java.util.List;
+
+public interface EventRepository extends
+        JpaRepository<Event, Long>,
+        JpaSpecificationExecutor<Event> {
+        List<Event> findByCategoryId(Long categoryId);
+        List<Event> findByOrganizerId(Long organizerId);
+        List<Event> findByTitleContainingIgnoreCase(String keyword);
+}

@@ -3,7 +3,7 @@ package com.project.EventPlanner.features.event.domain;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import org.springframework.data.jpa.domain.Specification;
 
-public class EventSpecifiaction{
+public class EventSpecification {
 
     public static Specification<Event> hasKeyword(String keyword) {
         return (root, query, cb) -> {
