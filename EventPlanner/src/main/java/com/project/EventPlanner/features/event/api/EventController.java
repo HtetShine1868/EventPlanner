@@ -1,8 +1,11 @@
 package com.project.EventPlanner.features.event.api;
 
+import com.project.EventPlanner.features.event.domain.EventStatus;
+import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.EventRequestDto;
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
 import com.project.EventPlanner.features.event.domain.model.Event;
+import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.event.domain.service.EventService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final EventRepository eventRepository;
+    private final EventMapper eventMapper;
 
     @PostMapping
     public ResponseEntity<EventResponseDto> createEvent(@RequestBody EventRequestDto dto) {
@@ -24,8 +29,11 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventResponseDto>> getAllEvents() {
-        return ResponseEntity.ok(eventService.getAllEvents());
+    public List<EventResponseDto> getApprovedEvents() {
+        return eventRepository.findByStatus(EventStatus.APPROVED)
+                .stream()
+                .map(eventMapper::toDto)
+                .toList();
     }
 
     @GetMapping("/{id}")
@@ -45,4 +53,5 @@ public class EventController {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
+
 }

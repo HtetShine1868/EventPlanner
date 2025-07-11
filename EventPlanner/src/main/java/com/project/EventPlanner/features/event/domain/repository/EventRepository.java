@@ -1,5 +1,6 @@
 package com.project.EventPlanner.features.event.domain.repository;
 
+import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -13,4 +14,5 @@ public interface EventRepository extends
         List<Event> findByCategoryId(Long categoryId);
         List<Event> findByOrganizerId(Long organizerId);
         List<Event> findByTitleContainingIgnoreCase(String keyword);
+        List<Event> findByStatus(EventStatus status);
 }
