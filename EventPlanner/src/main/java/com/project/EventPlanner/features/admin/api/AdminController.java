@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admin/events")
+@RequestMapping("/api/admin")
 public class AdminController {
     private final AdminService adminService;
     private final EventRepository eventRepository;
@@ -25,7 +25,7 @@ public class AdminController {
 
 
 
-    @PutMapping("/organizer-applications/review")
+    @PutMapping("/organizer-application/review")
     public ResponseEntity<OrganizerApplicationDTO> reviewApplication(@RequestBody OrganizerApplicationReviewDTO dto) {
         return ResponseEntity.ok(adminService.reviewOrganizerApplication(dto));
     }

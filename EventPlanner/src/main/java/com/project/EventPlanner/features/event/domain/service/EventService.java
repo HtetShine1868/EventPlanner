@@ -1,5 +1,6 @@
 package com.project.EventPlanner.features.event.domain.service;
 
+import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.EventRequestDto;
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
@@ -26,10 +27,10 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class EventService {
 
-    private EventRepository eventRepository;
-    private EventCategoryRepository eventCategoryRepository;
-    private UserRepository userRepository;
-    private EventMapper eventMapper;
+    private final EventRepository eventRepository;
+    private final EventCategoryRepository eventCategoryRepository;
+    private final UserRepository userRepository;
+    private final EventMapper eventMapper;
 
     public EventResponseDto createEvent(EventRequestDto eventRequestDto) {
         Event event =eventMapper.toEntity(eventRequestDto);
@@ -41,6 +42,7 @@ public class EventService {
                 userRepository.findById(eventRequestDto.getOrganizerId())
                         .orElseThrow(() -> new RuntimeException("Organizer not found"))
         );
+        event.setStatus(EventStatus.PENDING);
         event.setRegisteredCount(0); // initialize
         return eventMapper.toDto(eventRepository.save(event));
     }
@@ -56,16 +58,28 @@ public class EventService {
                 .collect(Collectors.toList());
     }
     public EventResponseDto updateEvent(Long id, EventRequestDto dto) {
+        // 1. Fetch existing event
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
+        // 2. Map new data from DTO (creates a new Event object)
         Event updatedEvent = eventMapper.toEntity(dto);
-        updatedEvent.setId(id);
-        updatedEvent.setRegisteredCount(existingEvent.getRegisteredCount()); // preserve
 
+        // 3. Preserve immutable or sensitive fields
+        updatedEvent.setId(id); // ensure update
+        updatedEvent.setRegisteredCount(existingEvent.getRegisteredCount()); // preserve count
+
+        // 4. Preserve existing status if not provided
+        if (dto.getStatus() != null) {
+            updatedEvent.setStatus(dto.getStatus());
+        } else {
+            updatedEvent.setStatus(existingEvent.getStatus()); // preserve status
+        }
+
+        // 5. Set related entities
         updatedEvent.setCategory(
-                eventCategoryRepository.findById(dto.getCategoryId()).
-                        orElseThrow(()->new RuntimeException("Category not found"))
+                eventCategoryRepository.findById(dto.getCategoryId())
+                        .orElseThrow(() -> new RuntimeException("Category not found"))
         );
 
         updatedEvent.setOrganizer(
@@ -73,8 +87,10 @@ public class EventService {
                         .orElseThrow(() -> new RuntimeException("Organizer not found"))
         );
 
+        // 6. Save and return
         return eventMapper.toDto(eventRepository.save(updatedEvent));
     }
+
     public void deleteEvent(Long id) {
         if (!eventRepository.existsById(id)) {
             throw new RuntimeException("Event not found");

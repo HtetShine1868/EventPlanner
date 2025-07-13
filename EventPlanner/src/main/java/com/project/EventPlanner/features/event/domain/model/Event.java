@@ -33,13 +33,6 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
-    private Integer capacity;
-
-    private Integer registeredCount; // You can also compute this instead of storing
-
-    @Enumerated(EnumType.STRING)
-    private EventStatus status = EventStatus.PENDING;
-
     @ManyToOne
     @JoinColumn(name = "organizer_id")
     private User organizer;
@@ -47,5 +40,16 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private EventCategory category;
+
+    private Integer capacity;
+
+    private Integer registeredCount;
+
+
+    @Enumerated(EnumType.STRING)
+    private EventStatus status = EventStatus.PENDING;
+
+
+
 }
 

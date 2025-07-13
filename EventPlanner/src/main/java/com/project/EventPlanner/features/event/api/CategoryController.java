@@ -16,8 +16,8 @@ public class CategoryController {
 
     private final EventCategoryService eventCategoryService;
 
-    @PutMapping
-    public ResponseEntity<CategoryDto> updateCategory(@RequestBody CategoryDto categoryDto) {
+    @PostMapping
+    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
         return ResponseEntity.ok(eventCategoryService.create(categoryDto));
     }
     @GetMapping

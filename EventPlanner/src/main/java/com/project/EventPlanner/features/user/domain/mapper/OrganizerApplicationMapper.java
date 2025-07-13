@@ -10,6 +10,7 @@ import java.util.List;
 @Mapper(componentModel ="spring")
 public interface OrganizerApplicationMapper {
 
+
     @Mapping(source = "user.id", target = "userId")
     OrganizerApplicationDTO toDTO(OrganizerApplication application);
 

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -21,19 +21,19 @@ public class UserController {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
 
-    // Register new user
+
     @PostMapping("/register")
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterDto dto) {
         return ResponseEntity.ok(userService.registerUser(dto));
     }
 
-    // Get user by ID
+
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    // Get all users
+
     @GetMapping
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();

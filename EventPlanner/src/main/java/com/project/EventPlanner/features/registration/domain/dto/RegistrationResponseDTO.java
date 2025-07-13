@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class RegistrationRespnseDTO {
+public class RegistrationResponseDTO {
     private Long id;
     private String eventTitle;
     private String username;

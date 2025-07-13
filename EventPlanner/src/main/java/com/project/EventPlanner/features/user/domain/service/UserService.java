@@ -34,7 +34,7 @@ public class UserService {
         User user = userMapper.toEntity(dto);
 
         // Set default role (e.g. ROLE_USER)
-        Role role = roleRepository.findByName("ROLE_USER")
+        Role role = roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
         user.setRole(role);
 

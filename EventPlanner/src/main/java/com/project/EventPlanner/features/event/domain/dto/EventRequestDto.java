@@ -1,12 +1,15 @@
 package com.project.EventPlanner.features.event.domain.dto;
 
 import com.project.EventPlanner.features.event.domain.EventStatus;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventRequestDto {
-    private String name;
+    private String title;
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
