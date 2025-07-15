@@ -119,4 +119,10 @@ public class EventService {
         return eventRepository.findAll(spec, pageable)
                 .map(eventMapper::toDto);
     }
+    public List<EventResponseDto> getEventsByOrganizer(Long organizerId) {
+        List<Event> events = eventRepository.findByOrganizerId(organizerId);
+        return events.stream()
+                .map(eventMapper::toDto)
+                .toList();
+    }
 }

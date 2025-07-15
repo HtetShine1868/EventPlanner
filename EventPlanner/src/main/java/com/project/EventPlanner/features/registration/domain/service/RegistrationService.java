@@ -1,6 +1,8 @@
 package com.project.EventPlanner.features.registration.domain.service;
 
 import com.project.EventPlanner.features.event.domain.EventStatus;
+import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
+import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.registration.domain.RegisterMapper;
@@ -28,6 +30,7 @@ public class RegistrationService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final RegisterMapper registerMapper;
+    private final EventMapper eventMapper;
 
 
     public RegistrationResponseDTO registerUserToEvent(RegistrationRequestDTO dto) {
@@ -81,6 +84,12 @@ public class RegistrationService {
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
         reg.setCheckedIn(true);
         return registrationRepo.save(reg);
+    }
+    public List<EventResponseDto> getEventsRegisteredByUser(Long userId) {
+        List<Registration> registrations = registrationRepo.findByUserId(userId);
+        return registrations.stream()
+                .map(reg -> eventMapper.toDto(reg.getEvent()))
+                .toList();
     }
 
 }
