@@ -17,6 +17,8 @@ import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.user.domain.repository.OrganizerApplicationRepository;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -85,11 +87,11 @@ public class RegistrationService {
         reg.setCheckedIn(true);
         return registrationRepo.save(reg);
     }
-    public List<EventResponseDto> getEventsRegisteredByUser(Long userId) {
-        List<Registration> registrations = registrationRepo.findByUserId(userId);
-        return registrations.stream()
-                .map(reg -> eventMapper.toDto(reg.getEvent()))
-                .toList();
+    public Page<EventResponseDto> getRegisteredEventsByUser(Long userId, Pageable pageable) {
+        Page<Registration> registrations = registrationRepo.findByUserId(userId, pageable);
+        return registrations.map(reg -> eventMapper.toDto(reg.getEvent()));
     }
+
+
 
 }

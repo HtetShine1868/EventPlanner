@@ -9,6 +9,10 @@ import com.project.EventPlanner.features.event.domain.repository.EventRepository
 import com.project.EventPlanner.features.event.domain.service.EventService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,11 +33,14 @@ public class EventController {
     }
 
     @GetMapping
-    public List<EventResponseDto> getApprovedEvents() {
-        return eventRepository.findByStatus(EventStatus.APPROVED)
-                .stream()
-                .map(eventMapper::toDto)
-                .toList();
+    public ResponseEntity<Page<EventResponseDto>> getApprovedEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "startTime,asc") String[] sort
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sort[1]), sort[0]));
+        Page<EventResponseDto> events = eventService.getApprovedEvents(pageable);
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")

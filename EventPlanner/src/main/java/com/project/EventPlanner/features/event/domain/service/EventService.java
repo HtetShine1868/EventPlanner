@@ -97,7 +97,10 @@ public class EventService {
         }
         eventRepository.deleteById(id);
     }
-
+    public Page<EventResponseDto> getApprovedEvents(Pageable pageable) {
+        return eventRepository.findByStatus(EventStatus.APPROVED, pageable)
+                .map(eventMapper::toDto);
+    }
     public Page<EventResponseDto> searchEventsForUser(String keyword, Long categoryId, Pageable pageable) {
         Specification<Event> spec =
                 EventSpecification.hasKeyword(keyword)
