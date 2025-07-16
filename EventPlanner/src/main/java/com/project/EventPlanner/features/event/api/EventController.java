@@ -13,9 +13,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -60,11 +62,21 @@ public class EventController {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/organizers/{organizerId}/events")
     public ResponseEntity<List<EventResponseDto>> getOrganizerEvents(@PathVariable Long organizerId) {
         List<EventResponseDto> events = eventService.getEventsByOrganizer(organizerId);
         return ResponseEntity.ok(events);
     }
-
+    @GetMapping("/search")
+    public ResponseEntity<Page<EventResponseDto>> filterEventsByCategoryAndLocation(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String location,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<EventResponseDto> filteredEvents = eventService.filterEventsByCategoryAndLocation(categoryId, location, page, size);
+        return ResponseEntity.ok(filteredEvents);
+    }
 
 }

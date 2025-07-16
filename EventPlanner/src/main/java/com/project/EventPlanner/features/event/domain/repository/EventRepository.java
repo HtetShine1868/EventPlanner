@@ -6,8 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends
@@ -18,5 +21,12 @@ public interface EventRepository extends
         List<Event> findByTitleContainingIgnoreCase(String keyword);
         List<Event> findByStatus(EventStatus status);
         Page<Event> findByStatus(EventStatus status, Pageable pageable);
+
+        Page<Event> findByCategoryIdAndStatus(Long categoryId, EventStatus status, Pageable pageable);
+
+        Page<Event> findByLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(String location, EventStatus status, Pageable pageable);
+
+        Page<Event> findByCategoryIdAndLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(
+                Long categoryId, String location, EventStatus status, Pageable pageable);
 
 }

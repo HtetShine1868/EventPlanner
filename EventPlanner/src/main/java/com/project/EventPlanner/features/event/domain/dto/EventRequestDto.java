@@ -13,6 +13,7 @@ public class EventRequestDto {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String location;
     private Integer capacity;
     private EventStatus status;
     private Long categoryId;

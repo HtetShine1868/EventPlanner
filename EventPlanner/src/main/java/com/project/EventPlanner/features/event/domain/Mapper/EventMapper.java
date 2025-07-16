@@ -9,10 +9,14 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface EventMapper {
     @Mapping(target = "title", source = "title")
-    @Mapping(target = "category.id",source = "categoryId")
+    @Mapping(target = "description", source = "description")
+    @Mapping(target = "location", source = "location") // ✅ Fix: Add this
+    @Mapping(target = "startTime", source = "startTime")
+    @Mapping(target = "endTime", source = "endTime")
+    @Mapping(target = "capacity", source = "capacity")
+    @Mapping(target = "category.id", source = "categoryId")
     @Mapping(target = "organizer.id", source = "organizerId")
     Event toEntity(EventRequestDto dto);
-
 
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "organizerUsername", source = "organizer.username")

@@ -10,6 +10,7 @@ import com.project.EventPlanner.features.event.domain.repository.EventRepository
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.project.EventPlanner.features.event.domain.EventSpecification;
@@ -18,6 +19,7 @@ import com.project.EventPlanner.features.event.domain.EventSpecification;
 
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -101,31 +103,29 @@ public class EventService {
         return eventRepository.findByStatus(EventStatus.APPROVED, pageable)
                 .map(eventMapper::toDto);
     }
-    public Page<EventResponseDto> searchEventsForUser(String keyword, Long categoryId, Pageable pageable) {
-        Specification<Event> spec =
-                EventSpecification.hasKeyword(keyword)
-                        .and(EventSpecification.hasCategoryId(categoryId))
-                        .and(EventSpecification.hasStatus("APPROVED"));
 
-        Page<Event> page = eventRepository.findAll(spec, pageable); 
-
-        return page.map(eventMapper::toDto);
-    }
-
-
-    public Page<EventResponseDto> searchEventsForAdmin(String keyword, Long categoryId, String status, Pageable pageable) {
-        Specification<Event> spec = EventSpecification
-                .hasKeyword(keyword)
-                .and(EventSpecification.hasCategoryId(categoryId))
-                .and(EventSpecification.hasStatus(status)); // Admin can filter by status
-
-        return eventRepository.findAll(spec, pageable)
-                .map(eventMapper::toDto);
-    }
     public List<EventResponseDto> getEventsByOrganizer(Long organizerId) {
         List<Event> events = eventRepository.findByOrganizerId(organizerId);
         return events.stream()
                 .map(eventMapper::toDto)
                 .toList();
+    }
+    public Page<EventResponseDto> filterEventsByCategoryAndLocation(Long categoryId, String location, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> filteredEvents;
+        EventStatus approved = EventStatus.APPROVED;
+
+        if (categoryId != null && location != null && !location.isBlank()) {
+            filteredEvents = eventRepository
+                    .findByCategoryIdAndLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(categoryId, location, approved, pageable);
+        } else if (categoryId != null) {
+            filteredEvents = eventRepository.findByCategoryIdAndStatus(categoryId, approved, pageable);
+        } else if (location != null && !location.isBlank()) {
+            filteredEvents = eventRepository.findByLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(location, approved, pageable);
+        } else {
+            filteredEvents = eventRepository.findByStatus(approved, pageable);
+        }
+
+        return filteredEvents.map(eventMapper::toDto);
     }
 }
