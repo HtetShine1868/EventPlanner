@@ -27,6 +27,10 @@ public class Event {
 
     private String location;
 
+    private Double latitude;
+
+    private Double longitude;
+
     @Column(nullable = false)
     private LocalDateTime startTime;
 
@@ -44,7 +48,6 @@ public class Event {
     private Integer capacity;
 
     private Integer registeredCount;
-
 
     @Enumerated(EnumType.STRING)
     private EventStatus status = EventStatus.PENDING;

@@ -13,6 +13,8 @@ public class EventResponseDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String location;
+    private Double latitude;
+    private Double longitude;
     private Integer capacity;
     private Integer registeredCount;
     private EventStatus status;

@@ -28,5 +28,18 @@ public interface EventRepository extends
 
         Page<Event> findByCategoryIdAndLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(
                 Long categoryId, String location, EventStatus status, Pageable pageable);
+        @Query("""
+SELECT e FROM Event e
+WHERE e.location = :location
+AND e.status = 'APPROVED'
+AND (
+    :startTime < e.endTime AND :endTime > e.startTime
+)
+""")
+        List<Event> findConflictingEvents(
+                @Param("location") String location,
+                @Param("startTime") LocalDateTime startTime,
+                @Param("endTime") LocalDateTime endTime
+        );
 
 }

@@ -1,5 +1,6 @@
 package com.project.EventPlanner.features.event.domain.service;
 
+import com.project.EventPlanner.exception.EventConflictException;
 import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.EventRequestDto;
@@ -35,19 +36,38 @@ public class EventService {
     private final EventMapper eventMapper;
 
     public EventResponseDto createEvent(EventRequestDto eventRequestDto) {
-        Event event =eventMapper.toEntity(eventRequestDto);
+        Event event = eventMapper.toEntity(eventRequestDto);
+
+        // Set category
         event.setCategory(
-                eventCategoryRepository.findById(eventRequestDto.getCategoryId()).
-                        orElseThrow(()->new RuntimeException("Category not found"))
+                eventCategoryRepository.findById(eventRequestDto.getCategoryId())
+                        .orElseThrow(() -> new RuntimeException("Category not found"))
         );
+
+        // Set organizer
         event.setOrganizer(
                 userRepository.findById(eventRequestDto.getOrganizerId())
                         .orElseThrow(() -> new RuntimeException("Organizer not found"))
         );
+
+        // ✅ Check for conflicting event at same location and overlapping time
+        List<Event> conflicts = eventRepository.findConflictingEvents(
+                event.getLocation(),
+                event.getStartTime(),
+                event.getEndTime()
+        );
+
+        if (!conflicts.isEmpty()) {
+            throw new EventConflictException("Conflict: An event already exists at this location and time.");
+        }
+
+        // Final fields
         event.setStatus(EventStatus.PENDING);
         event.setRegisteredCount(0); // initialize
+
         return eventMapper.toDto(eventRepository.save(event));
     }
+
     public EventResponseDto getEventById(Long id) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
@@ -60,25 +80,32 @@ public class EventService {
                 .collect(Collectors.toList());
     }
     public EventResponseDto updateEvent(Long id, EventRequestDto dto) {
-        // 1. Fetch existing event
+
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        // 2. Map new data from DTO (creates a new Event object)
+        List<Event> conflicts = eventRepository.findConflictingEvents(
+                existingEvent.getLocation(),
+                existingEvent.getStartTime(),
+                existingEvent.getEndTime()
+        );
+
+        if (!conflicts.isEmpty()) {
+            throw new EventConflictException("Conflict: An event already exists at this location and time.");
+        }
         Event updatedEvent = eventMapper.toEntity(dto);
 
-        // 3. Preserve immutable or sensitive fields
         updatedEvent.setId(id); // ensure update
         updatedEvent.setRegisteredCount(existingEvent.getRegisteredCount()); // preserve count
 
-        // 4. Preserve existing status if not provided
+
         if (dto.getStatus() != null) {
             updatedEvent.setStatus(dto.getStatus());
         } else {
             updatedEvent.setStatus(existingEvent.getStatus()); // preserve status
         }
 
-        // 5. Set related entities
+
         updatedEvent.setCategory(
                 eventCategoryRepository.findById(dto.getCategoryId())
                         .orElseThrow(() -> new RuntimeException("Category not found"))
@@ -89,7 +116,7 @@ public class EventService {
                         .orElseThrow(() -> new RuntimeException("Organizer not found"))
         );
 
-        // 6. Save and return
+
         return eventMapper.toDto(eventRepository.save(updatedEvent));
     }
 
