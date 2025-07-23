@@ -50,20 +50,22 @@ public class EventService {
                         .orElseThrow(() -> new RuntimeException("Organizer not found"))
         );
 
-        // ✅ Check for conflicting event at same location and overlapping time
+        // ✅ Conflict check (check PENDING and APPROVED)
         List<Event> conflicts = eventRepository.findConflictingEvents(
                 event.getLocation(),
+                event.getLatitude(),
+                event.getLongitude(),
                 event.getStartTime(),
                 event.getEndTime()
         );
 
         if (!conflicts.isEmpty()) {
-            throw new EventConflictException("Conflict: An event already exists at this location and time.");
+            throw new EventConflictException("Conflict: Another event already exists at this location and time.");
         }
 
         // Final fields
         event.setStatus(EventStatus.PENDING);
-        event.setRegisteredCount(0); // initialize
+        event.setRegisteredCount(0);
 
         return eventMapper.toDto(eventRepository.save(event));
     }
@@ -80,42 +82,45 @@ public class EventService {
                 .collect(Collectors.toList());
     }
     public EventResponseDto updateEvent(Long id, EventRequestDto dto) {
-
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        List<Event> conflicts = eventRepository.findConflictingEvents(
-                existingEvent.getLocation(),
-                existingEvent.getStartTime(),
-                existingEvent.getEndTime()
-        );
-
-        if (!conflicts.isEmpty()) {
-            throw new EventConflictException("Conflict: An event already exists at this location and time.");
-        }
         Event updatedEvent = eventMapper.toEntity(dto);
+        updatedEvent.setId(id);
+        updatedEvent.setRegisteredCount(existingEvent.getRegisteredCount());
 
-        updatedEvent.setId(id); // ensure update
-        updatedEvent.setRegisteredCount(existingEvent.getRegisteredCount()); // preserve count
-
-
+        // Status handling
         if (dto.getStatus() != null) {
             updatedEvent.setStatus(dto.getStatus());
         } else {
-            updatedEvent.setStatus(existingEvent.getStatus()); // preserve status
+            updatedEvent.setStatus(existingEvent.getStatus());
         }
 
-
+        // Set category
         updatedEvent.setCategory(
                 eventCategoryRepository.findById(dto.getCategoryId())
                         .orElseThrow(() -> new RuntimeException("Category not found"))
         );
 
+        // Set organizer
         updatedEvent.setOrganizer(
                 userRepository.findById(dto.getOrganizerId())
                         .orElseThrow(() -> new RuntimeException("Organizer not found"))
         );
 
+        // ✅ Conflict check (exclude current event's ID)
+        List<Event> conflicts = eventRepository.findConflictingEventsExcludingSelf(
+                updatedEvent.getLocation(),
+                updatedEvent.getLatitude(),
+                updatedEvent.getLongitude(),
+                updatedEvent.getStartTime(),
+                updatedEvent.getEndTime(),
+                id
+        );
+
+        if (!conflicts.isEmpty()) {
+            throw new EventConflictException("Conflict: Another event already exists at this location and time.");
+        }
 
         return eventMapper.toDto(eventRepository.save(updatedEvent));
     }
@@ -137,18 +142,18 @@ public class EventService {
                 .map(eventMapper::toDto)
                 .toList();
     }
-    public Page<EventResponseDto> filterEventsByCategoryAndLocation(Long categoryId, String location, int page, int size) {
+    public Page<EventResponseDto> filterEventsByCategoryAndLocation(Long categoryId, String location,Double latitude,Double longitude, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Event> filteredEvents;
         EventStatus approved = EventStatus.APPROVED;
 
         if (categoryId != null && location != null && !location.isBlank()) {
             filteredEvents = eventRepository
-                    .findByCategoryIdAndLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(categoryId, location, approved, pageable);
+                    .findByCategoryIdAndLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(categoryId, location,latitude,longitude, approved, pageable);
         } else if (categoryId != null) {
             filteredEvents = eventRepository.findByCategoryIdAndStatus(categoryId, approved, pageable);
         } else if (location != null && !location.isBlank()) {
-            filteredEvents = eventRepository.findByLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(location, approved, pageable);
+            filteredEvents = eventRepository.findByLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(location,latitude,longitude, approved, pageable);
         } else {
             filteredEvents = eventRepository.findByStatus(approved, pageable);
         }

@@ -1,5 +1,6 @@
 package com.project.EventPlanner.features.admin.domain.service;
 
+import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationReviewDTO;
 import com.project.EventPlanner.features.user.domain.mapper.OrganizerApplicationMapper;
@@ -27,8 +28,7 @@ public class AdminService {
         OrganizerApplication app = applicationRepository.findById(dto.getApplicationId())
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        if ("APPROVED".equalsIgnoreCase(dto.getDecision())) {
-            app.setStatus("APPROVED");
+            app.setStatus(dto.getDecision());
 
             // Set user role to ORGANIZER
             User user = app.getUser();
@@ -36,16 +36,15 @@ public class AdminService {
                     .orElseThrow(() -> new RuntimeException("ORGANIZER role not found"));
             user.setRole(organizerRole);
             userRepository.save(user);
-
-        } else if ("REJECTED".equalsIgnoreCase(dto.getDecision())) {
-            app.setStatus("REJECTED");
-
-        } else {
-            throw new IllegalArgumentException("Decision must be APPROVED or REJECTED");
-        }
-
         return mapper.toDTO(applicationRepository.save(app));
     }
+
+        public List<OrganizerApplicationDTO> getPendingApplications() {
+            return applicationRepository.findByStatus(OrganizerApplicationStatus.PENDING)
+                    .stream()
+                    .map(mapper::toDTO)
+                    .toList();
+        }
 
 
 }

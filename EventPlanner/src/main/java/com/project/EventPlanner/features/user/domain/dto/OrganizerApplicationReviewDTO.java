@@ -1,10 +1,11 @@
 package com.project.EventPlanner.features.user.domain.dto;
 
-import com.project.EventPlanner.features.user.domain.ReviewDecision;
+import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import lombok.Data;
 
 @Data
 public class OrganizerApplicationReviewDTO {
     private Long applicationId;
-    private String decision;
+    private OrganizerApplicationStatus decision; // in Review DTO
+
 }

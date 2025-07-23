@@ -1,6 +1,7 @@
 package com.project.EventPlanner.features.user.domain.model;
 
 
+import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,8 +26,8 @@ public class OrganizerApplication {
 
     private String organizerName;
 
-    @Column(nullable = false)
-    private String status; // PENDING, APPROVED, REJECTED
+    @Enumerated(EnumType.STRING)
+    private OrganizerApplicationStatus status = OrganizerApplicationStatus.PENDING;
 
     @Column(nullable = false)
     private LocalDateTime appliedAt = LocalDateTime.now();

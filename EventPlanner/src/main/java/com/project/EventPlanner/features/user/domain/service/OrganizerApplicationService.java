@@ -1,5 +1,6 @@
 package com.project.EventPlanner.features.user.domain.service;
 
+import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
 import com.project.EventPlanner.features.user.domain.mapper.OrganizerApplicationMapper;
 import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
@@ -23,9 +24,6 @@ public class OrganizerApplicationService {
     private final RoleRepository roleRepository;
     private final OrganizerApplicationMapper mapper;
 
-
-
-
     public OrganizerApplicationDTO apply(OrganizerApplicationDTO dto) {
        User user = userRepository.findById(dto.getUserId())
                .orElseThrow(() -> new RuntimeException("User Not Found"));
@@ -36,7 +34,7 @@ public class OrganizerApplicationService {
         }
         OrganizerApplication app = mapper.toEntity(dto);
         app.setUser(user);
-        app.setStatus("PENDING");
+        app.setStatus(OrganizerApplicationStatus.PENDING);
         app.setAppliedAt(LocalDateTime.now());
 
         return mapper.toDTO(appRepository.save(app));
@@ -48,25 +46,8 @@ public class OrganizerApplicationService {
                 .orElseThrow(() -> new RuntimeException("Application not found"));
     }
 
-
     public List<OrganizerApplicationDTO> getAll() {
+
         return mapper.toDTOList(appRepository.findAll());
-    }
-
-
-    public OrganizerApplicationDTO approveApplication(Long id) {
-        OrganizerApplication app = appRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
-
-        app.setStatus("APPROVED");
-        return mapper.toDTO(appRepository.save(app));
-    }
-
-    public OrganizerApplicationDTO rejectApplication(Long id) {
-        OrganizerApplication app = appRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
-
-        app.setStatus("REJECTED");
-        return mapper.toDTO(appRepository.save(app));
     }
 }

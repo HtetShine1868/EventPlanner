@@ -10,7 +10,9 @@ import org.mapstruct.Mapping;
 public interface EventMapper {
     @Mapping(target = "title", source = "title")
     @Mapping(target = "description", source = "description")
-    @Mapping(target = "location", source = "location") // ✅ Fix: Add this
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "latitude", source = "latitude")
+    @Mapping(target = "longitude", source = "longitude")
     @Mapping(target = "startTime", source = "startTime")
     @Mapping(target = "endTime", source = "endTime")
     @Mapping(target = "capacity", source = "capacity")

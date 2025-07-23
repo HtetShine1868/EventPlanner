@@ -54,7 +54,8 @@ public class EventController {
     public ResponseEntity<EventResponseDto> updateEvent(
             @PathVariable Long id,
             @RequestBody EventRequestDto dto) {
-        return ResponseEntity.ok(eventService.updateEvent(id, dto));
+        EventResponseDto updatedEvent = eventService.updateEvent(id, dto);
+        return ResponseEntity.ok(updatedEvent);
     }
 
     @DeleteMapping("/{id}")
@@ -72,10 +73,12 @@ public class EventController {
     public ResponseEntity<Page<EventResponseDto>> filterEventsByCategoryAndLocation(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String location,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<EventResponseDto> filteredEvents = eventService.filterEventsByCategoryAndLocation(categoryId, location, page, size);
+        Page<EventResponseDto> filteredEvents = eventService.filterEventsByCategoryAndLocation(categoryId, location,latitude,longitude, page, size);
         return ResponseEntity.ok(filteredEvents);
     }
 

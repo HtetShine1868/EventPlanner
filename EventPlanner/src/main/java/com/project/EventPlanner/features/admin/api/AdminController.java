@@ -24,11 +24,17 @@ public class AdminController {
     private final EventMapper eventMapper;
 
 
-
+    //Organizer-application
     @PutMapping("/organizer-application/review")
     public ResponseEntity<OrganizerApplicationDTO> reviewApplication(@RequestBody OrganizerApplicationReviewDTO dto) {
         return ResponseEntity.ok(adminService.reviewOrganizerApplication(dto));
     }
+    @GetMapping("/organizer-applications/pending")
+    public ResponseEntity<List<OrganizerApplicationDTO>> getPendingOrganizerApplications() {
+        return ResponseEntity.ok(adminService.getPendingApplications());
+    }
+
+    //EventCrud
     @PutMapping("/{eventId}/approve")
     public ResponseEntity<EventResponseDto> approveEvent(@PathVariable Long eventId) {
         Event event = eventRepository.findById(eventId)
