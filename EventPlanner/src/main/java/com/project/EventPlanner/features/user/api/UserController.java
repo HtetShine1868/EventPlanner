@@ -8,6 +8,8 @@ import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import com.project.EventPlanner.features.user.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,25 +23,22 @@ public class UserController {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
 
-
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterDto dto) {
-        return ResponseEntity.ok(userService.registerUser(dto));
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getCurrentUser(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userService.toDto(user));
     }
 
-
+    // ✅ Optional: get user by ID (admin or debug only)
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-
+    // ✅ Optional: admin access to list all users
     @GetMapping
-    public List<UserResponseDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return userMapper.toDTOList(users);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
-
-
 
 }

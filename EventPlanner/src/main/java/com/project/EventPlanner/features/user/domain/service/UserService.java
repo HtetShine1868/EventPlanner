@@ -10,19 +10,22 @@ import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
 
-    public UserResponseDto registerUser(UserRegisterDto dto) {
+    // ✅ Called from AuthService (for registration)
+    public User registerUser(UserRegisterDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
@@ -33,16 +36,12 @@ public class UserService {
 
         User user = userMapper.toEntity(dto);
 
-        // Set default role (e.g. ROLE_USER)
         Role role = roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
         user.setRole(role);
 
-        // TODO: Encode password if using Spring Security
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        User saved = userRepository.save(user);
-        return userMapper.toDTO(saved);
+        // TODO: set encoded password if not done elsewhere
+        return userRepository.save(user);
     }
 
     public UserResponseDto getUserById(Long id) {
@@ -51,6 +50,17 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public UserResponseDto toDto(User user) {
+        return userMapper.toDTO(user);
+    }
 
+    public List<UserResponseDto> getAllUsers() {
+        return userMapper.toDTOList(userRepository.findAll());
+    }
 
+    // Used in AuthService login
+    public User loadUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }
