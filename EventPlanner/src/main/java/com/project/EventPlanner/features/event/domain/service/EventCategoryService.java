@@ -2,48 +2,42 @@ package com.project.EventPlanner.features.event.domain.service;
 
 import com.project.EventPlanner.features.event.domain.Mapper.CategoryMapper;
 import com.project.EventPlanner.features.event.domain.dto.CategoryDto;
+import com.project.EventPlanner.features.event.domain.dto.CategoryDto;
 import com.project.EventPlanner.features.event.domain.model.EventCategory;
 import com.project.EventPlanner.features.event.domain.repository.EventCategoryRepository;
-import jakarta.transaction.Transactional;
+import com.project.EventPlanner.features.event.domain.Mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class EventCategoryService {
 
-    private final EventCategoryRepository eventCategoryRepository;
-    private final CategoryMapper categoryMapper;
+    private final EventCategoryRepository repository;
+    private final CategoryMapper mapper;
+
+    public CategoryDto createCategory(CategoryDto dto) {
+        EventCategory category = mapper.ToEntity(dto);
+        return mapper.ToDto(repository.save(category));
+    }
 
     public List<CategoryDto> getAllCategories() {
-        return categoryMapper.toDTOList(eventCategoryRepository.findAll());
+        return mapper.ToDtoList(repository.findAll());
     }
-    public CategoryDto create(CategoryDto categoryDto) {
-        EventCategory category = categoryMapper.ToEntity(categoryDto);
-        category = eventCategoryRepository.save(category);
-        return categoryMapper.ToDto(category);
-    }
-    public CategoryDto findById(Long id) {
-        EventCategory category = eventCategoryRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Category not found"));
-       return categoryMapper.ToDto(category);
-    }
-    public CategoryDto updateCategory(Long id, CategoryDto dto) {
-        EventCategory existing = eventCategoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id " + id));
 
-        existing.setName(dto.getName()); // only one field
-        EventCategory updated = eventCategoryRepository.save(existing);
-
-        return categoryMapper.ToDto(updated);
+    public CategoryDto updateCategory(Long id,CategoryDto dto) {
+        EventCategory existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        existing.setName(dto.getName());
+        return mapper.ToDto(repository.save(existing));
     }
+
     public void deleteCategory(Long id) {
-        if (!eventCategoryRepository.existsById(id)) {
-            throw new RuntimeException("Category not found with id " + id);
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Category not found");
         }
-        eventCategoryRepository.deleteById(id);
+        repository.deleteById(id);
     }
 }

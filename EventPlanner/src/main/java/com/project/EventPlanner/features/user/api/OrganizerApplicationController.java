@@ -1,7 +1,6 @@
 package com.project.EventPlanner.features.user.api;
 
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
-import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
 import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.features.user.domain.service.OrganizerApplicationService;
 import lombok.RequiredArgsConstructor;

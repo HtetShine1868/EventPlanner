@@ -1,44 +1,43 @@
 package com.project.EventPlanner.features.event.api;
 
 import com.project.EventPlanner.features.event.domain.dto.CategoryDto;
-import com.project.EventPlanner.features.event.domain.model.EventCategory;
 import com.project.EventPlanner.features.event.domain.service.EventCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/event-categories")
+@RequestMapping("/event-categories")
 @RequiredArgsConstructor
 public class CategoryController {
 
-    private final EventCategoryService eventCategoryService;
+    private final EventCategoryService service;
 
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
-        return ResponseEntity.ok(eventCategoryService.create(categoryDto));
-    }
-    @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories() {
-        return ResponseEntity.ok(eventCategoryService.getAllCategories());
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<CategoryDto> create(@RequestBody CategoryDto dto) {
+        return ResponseEntity.ok(service.createCategory(dto));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long id) {
-        return ResponseEntity.ok(eventCategoryService.findById(id));
+    @GetMapping
+    public ResponseEntity<List<CategoryDto>> getAll() {
+        return ResponseEntity.ok(service.getAllCategories());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id,
-                                                      @RequestBody CategoryDto dto) {
-        return ResponseEntity.ok(eventCategoryService.updateCategory(id, dto));
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<CategoryDto> update(@PathVariable Long id,
+                                                   @RequestBody CategoryDto dto) {
+        return ResponseEntity.ok(service.updateCategory(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        eventCategoryService.deleteCategory(id);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,5 +11,5 @@ import java.util.List;
 public interface CategoryMapper {
     CategoryDto ToDto(EventCategory entity);
     EventCategory ToEntity(CategoryDto dto);
-    List<CategoryDto> toDTOList(List<EventCategory> entities);
+    List<CategoryDto> ToDtoList(List<EventCategory> entities);
 }
