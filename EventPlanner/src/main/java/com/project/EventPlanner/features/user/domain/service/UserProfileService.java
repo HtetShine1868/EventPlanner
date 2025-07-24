@@ -21,12 +21,9 @@ public class UserProfileService {
     private final UserMapper userMapper;
     private final UserProfileMapper userProfileMapper;
     private final UserRepository userRepository;
-
-    public UserProfileDto CreateUserProfile(UserProfileDto userProfileDto) {
-        UserProfile entity = userProfileMapper.toEntity(userProfileDto);
-        User user = userRepository.findById(userProfileDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id " +userProfileDto.getUserId()));
-        entity.setUser(user);
+    public UserProfileDto createUserProfile(UserProfileDto dto, User currentUser) {
+        UserProfile entity = userProfileMapper.toEntity(dto);
+        entity.setUser(currentUser); // assign current user from JWT
 
         UserProfile saved = profileRepository.save(entity);
         return userProfileMapper.toDto(saved);
@@ -34,37 +31,36 @@ public class UserProfileService {
     public UserProfileDto getUserProfileById(Long id) {
         UserProfile profile = profileRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + id));
-        // Use instance method on the injected mapper
         return userProfileMapper.toDto(profile);
     }
-
     public List<UserProfileDto> getAllUserProfiles() {
         return userProfileMapper.toDTOList(profileRepository.findAll());
     }
-    public UserProfileDto updateUserProfile(Long id, UserProfileDto dto) {
+
+    public UserProfileDto updateUserProfile(Long id, UserProfileDto dto, User currentUser) {
         UserProfile existing = profileRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + id));
+
+        // Check if current user owns this profile
+        if (!existing.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Unauthorized to update this profile");
+        }
 
         existing.setFullName(dto.getFullName());
         existing.setDateOfBirth(dto.getDateOfBirth());
         existing.setGender(dto.getGender());
 
-        // If userId changes, update the user association too
-        if (!existing.getUser().getId().equals(dto.getUserId())) {
-            User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found with id " + dto.getUserId()));
-            existing.setUser(user);
-        }
-
-
         UserProfile updated = profileRepository.save(existing);
         return userProfileMapper.toDto(updated);
     }
+    public void deleteUserProfile(Long id, User currentUser) {
+        UserProfile profile = profileRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + id));
 
-    public void deleteUserProfile(Long id) {
-        if (!profileRepository.existsById(id)) {
-            throw new RuntimeException("UserProfile not found with id " + id);
+        if (!profile.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Unauthorized to delete this profile");
         }
         profileRepository.deleteById(id);
     }
+
 }

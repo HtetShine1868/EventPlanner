@@ -24,21 +24,15 @@ public class OrganizerApplicationService {
     private final RoleRepository roleRepository;
     private final OrganizerApplicationMapper mapper;
 
-    public OrganizerApplicationDTO apply(OrganizerApplicationDTO dto) {
-       User user = userRepository.findById(dto.getUserId())
-               .orElseThrow(() -> new RuntimeException("User Not Found"));
-
-
-        if (appRepository.existsByUserId(dto.getUserId())) {
-            throw new RuntimeException("User already applied");
-        }
-        OrganizerApplication app = mapper.toEntity(dto);
-        app.setUser(user);
-        app.setStatus(OrganizerApplicationStatus.PENDING);
-        app.setAppliedAt(LocalDateTime.now());
-
-        return mapper.toDTO(appRepository.save(app));
+    public OrganizerApplicationDTO createApplication(OrganizerApplicationDTO dto, User currentUser) {
+        OrganizerApplication entity = mapper.toEntity(dto);
+        entity.setUser(currentUser);
+        entity.setStatus(OrganizerApplicationStatus.PENDING); // initial status
+        entity.setAppliedAt(LocalDateTime.now());
+        OrganizerApplication saved = appRepository.save(entity);
+        return mapper.toDTO(saved);
     }
+
 
     public OrganizerApplicationDTO getById(Long id) {
         return appRepository.findById(id)
