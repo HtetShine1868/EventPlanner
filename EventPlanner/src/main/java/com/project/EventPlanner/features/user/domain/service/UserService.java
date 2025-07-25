@@ -23,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     // ✅ Called from AuthService (for registration)
     public User registerUser(UserRegisterDto dto) {
@@ -36,12 +37,15 @@ public class UserService {
 
         User user = userMapper.toEntity(dto);
 
+        // ✅ Encode password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // ✅ Set default role (e.g., USER)
         Role role = roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
         user.setRole(role);
 
-        // TODO: set encoded password if not done elsewhere
-        return userRepository.save(user);
+        return userRepository.save(user); // no need to map to DTO here — let AuthService do that if needed
     }
 
     public UserResponseDto getUserById(Long id) {

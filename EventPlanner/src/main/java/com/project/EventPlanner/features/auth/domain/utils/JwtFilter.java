@@ -3,6 +3,7 @@ package com.project.EventPlanner.features.auth.domain.utils;
 import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 
+import com.project.EventPlanner.security.CustomUserDetail;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,8 +53,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = userRepository.findByUsername(username)
+            User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            UserDetails userDetails = new CustomUserDetail(user);
 
             if (jwtUtil.isTokenValid(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =

@@ -19,5 +19,4 @@ public class EventRequestDto {
     private Integer capacity;
     private EventStatus status;
     private Long categoryId;
-    private Long organizerId;
 }

@@ -8,6 +8,7 @@ import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventCategoryRepository;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
+import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
 
-    public EventResponseDto createEvent(EventRequestDto eventRequestDto) {
+    public EventResponseDto createEvent(EventRequestDto eventRequestDto, User currentUser) {
         Event event = eventMapper.toEntity(eventRequestDto);
 
         // Set category
@@ -45,12 +46,7 @@ public class EventService {
         );
 
         // Set organizer
-        event.setOrganizer(
-                userRepository.findById(eventRequestDto.getOrganizerId())
-                        .orElseThrow(() -> new RuntimeException("Organizer not found"))
-        );
-
-        // ✅ Conflict check (check PENDING and APPROVED)
+        event.setOrganizer(currentUser);
         List<Event> conflicts = eventRepository.findConflictingEvents(
                 event.getLocation(),
                 event.getLatitude(),
@@ -81,7 +77,7 @@ public class EventService {
                 .map(eventMapper::toDto)
                 .collect(Collectors.toList());
     }
-    public EventResponseDto updateEvent(Long id, EventRequestDto dto) {
+    public EventResponseDto updateEvent(Long id, EventRequestDto dto,User currentUser) {
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
@@ -103,10 +99,7 @@ public class EventService {
         );
 
         // Set organizer
-        updatedEvent.setOrganizer(
-                userRepository.findById(dto.getOrganizerId())
-                        .orElseThrow(() -> new RuntimeException("Organizer not found"))
-        );
+        updatedEvent.setOrganizer(existingEvent.getOrganizer());
 
         // ✅ Conflict check (exclude current event's ID)
         List<Event> conflicts = eventRepository.findConflictingEventsExcludingSelf(

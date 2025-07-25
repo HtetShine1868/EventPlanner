@@ -2,6 +2,7 @@ package com.project.EventPlanner.features.user.domain.service;
 
 import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
+import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationRequestDTO;
 import com.project.EventPlanner.features.user.domain.mapper.OrganizerApplicationMapper;
 import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
 import com.project.EventPlanner.features.user.domain.model.Role;
@@ -24,13 +25,22 @@ public class OrganizerApplicationService {
     private final RoleRepository roleRepository;
     private final OrganizerApplicationMapper mapper;
 
-    public OrganizerApplicationDTO createApplication(OrganizerApplicationDTO dto, User currentUser) {
-        OrganizerApplication entity = mapper.toEntity(dto);
-        entity.setUser(currentUser);
-        entity.setStatus(OrganizerApplicationStatus.PENDING); // initial status
-        entity.setAppliedAt(LocalDateTime.now());
-        OrganizerApplication saved = appRepository.save(entity);
-        return mapper.toDTO(saved);
+    public OrganizerApplicationDTO createApplication(OrganizerApplicationRequestDTO dto) {
+        OrganizerApplication application = mapper.toEntity(dto);
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (appRepository.existsByUser(user)) {
+            throw new RuntimeException("You have already applied to become an organizer.");
+        }
+        application.setUser(user);
+
+        application.setStatus(OrganizerApplicationStatus.PENDING);
+        application.setAppliedAt(LocalDateTime.now());
+
+        OrganizerApplication savedApp = appRepository.save(application);
+        return mapper.toDTO(savedApp);
     }
 
 
@@ -42,6 +52,7 @@ public class OrganizerApplicationService {
 
     public List<OrganizerApplicationDTO> getAll() {
 
-        return mapper.toDTOList(appRepository.findAll());
+        List<OrganizerApplication> pendingApps = appRepository.findByStatus(OrganizerApplicationStatus.PENDING);
+        return mapper.toDTOList(pendingApps);
     }
 }

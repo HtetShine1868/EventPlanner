@@ -7,6 +7,7 @@ import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.event.domain.service.EventService;
+import com.project.EventPlanner.features.user.domain.model.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -30,8 +34,11 @@ public class EventController {
     private final EventMapper eventMapper;
 
     @PostMapping
-    public ResponseEntity<EventResponseDto> createEvent(@RequestBody EventRequestDto dto) {
-        return ResponseEntity.ok(eventService.createEvent(dto));
+    @PreAuthorize("hasAuthority('ORGANIZER')")
+    public ResponseEntity<EventResponseDto> createEvent(@RequestBody EventRequestDto dto,
+                                                        @AuthenticationPrincipal User currentUser) {
+        EventResponseDto created = eventService.createEvent(dto, currentUser);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -49,16 +56,17 @@ public class EventController {
     public ResponseEntity<EventResponseDto> getEventById(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
-
     @PutMapping("/{id}")
-    public ResponseEntity<EventResponseDto> updateEvent(
-            @PathVariable Long id,
-            @RequestBody EventRequestDto dto) {
-        EventResponseDto updatedEvent = eventService.updateEvent(id, dto);
-        return ResponseEntity.ok(updatedEvent);
+    @PreAuthorize("hasAuthority('ORGANIZER') or hasAuthority('ADMIN')")
+    public ResponseEntity<EventResponseDto> updateEvent(@PathVariable Long id,
+                                                        @RequestBody EventRequestDto dto,
+                                                        @AuthenticationPrincipal User currentUser) {
+        EventResponseDto updated = eventService.updateEvent(id, dto, currentUser);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ORGANIZER') or hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();

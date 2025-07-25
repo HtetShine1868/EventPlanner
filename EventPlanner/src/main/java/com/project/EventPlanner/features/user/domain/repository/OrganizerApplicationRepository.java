@@ -2,6 +2,7 @@ package com.project.EventPlanner.features.user.domain.repository;
 
 import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
+import com.project.EventPlanner.features.user.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,5 +13,7 @@ public interface OrganizerApplicationRepository extends JpaRepository<OrganizerA
     List<OrganizerApplication> findByStatus(String status);
     Boolean existsByUserId(Long userId);
     List<OrganizerApplication> findByStatus(OrganizerApplicationStatus status);
+
+    Boolean existsByUser(User user);
 
 }

@@ -24,6 +24,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDto> getCurrentUser(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(userService.toDto(user));
     }

@@ -38,8 +38,9 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfile profile;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private OrganizerApplication organizerApplication;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

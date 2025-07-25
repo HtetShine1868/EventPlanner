@@ -17,7 +17,6 @@ public interface EventMapper {
     @Mapping(target = "endTime", source = "endTime")
     @Mapping(target = "capacity", source = "capacity")
     @Mapping(target = "category.id", source = "categoryId")
-    @Mapping(target = "organizer.id", source = "organizerId")
     Event toEntity(EventRequestDto dto);
 
     @Mapping(target = "categoryName", source = "category.name")
