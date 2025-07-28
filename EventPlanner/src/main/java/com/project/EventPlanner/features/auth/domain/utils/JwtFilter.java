@@ -59,17 +59,38 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails = new CustomUserDetail(user);
 
             if (jwtUtil.isTokenValid(token, userDetails)) {
+                String role = jwtUtil.extractRole(token); // e.g., "USER"
+                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+                // ✅ Inject authority manually
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                                userDetails, null, authorities);
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                // 🔍 ADD THESE:
+                System.out.println("✅ Setting authenticated user: " + user.getUsername());
+                System.out.println("✅ Role from token: " + role);
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                // 🔍 Confirm:
+                System.out.println("✅ SecurityContext set: " + SecurityContextHolder.getContext().getAuthentication());
+            } else {
+                System.out.println("❌ Token is not valid.");
+
             }
         }
+        System.out.println("➡️ Continuing with chain. Status: " + response.getStatus());
 
         // 4. Continue the filter chain
         filterChain.doFilter(request, response);
+        System.out.println("👉 JwtFilter triggered");
+        System.out.println("Authorization header: " + request.getHeader("Authorization"));
+        System.out.println("Extracted token: " + token);
+        System.out.println("Extracted username: " + username);
+
     }
 }
 

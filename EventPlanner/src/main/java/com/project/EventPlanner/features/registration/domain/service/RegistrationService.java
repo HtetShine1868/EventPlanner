@@ -3,6 +3,7 @@ package com.project.EventPlanner.features.registration.domain.service;
 import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
+import com.project.EventPlanner.features.event.domain.dto.RegisteredUserDTO;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.registration.domain.RegisterMapper;
@@ -14,11 +15,13 @@ import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
 import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.features.event.domain.model.Event;
 
+import com.project.EventPlanner.features.user.domain.model.UserProfile;
 import com.project.EventPlanner.features.user.domain.repository.OrganizerApplicationRepository;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,7 +38,7 @@ public class RegistrationService {
     private final EventMapper eventMapper;
 
 
-    public RegistrationResponseDTO registerUserToEvent(RegistrationRequestDTO dto) {
+    public RegistrationResponseDTO registerUserToEvent(RegistrationRequestDTO dto, User currentUser) {
         // 1. Fetch Event
         Event event = eventRepository.findById(dto.getEventId())
                 .orElseThrow(() -> new RuntimeException("Event not found with ID: " + dto.getEventId()));
@@ -50,12 +53,11 @@ public class RegistrationService {
             throw new RuntimeException("Event is full");
         }
 
-        // 4. Fetch User
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + dto.getUserId()));
+        // 4. Use current logged-in user
+        User user = currentUser;
 
         // 5. Prevent duplicate registration
-        boolean alreadyRegistered = registrationRepo.existsByEventIdAndUserId(dto.getEventId(), dto.getUserId());
+        boolean alreadyRegistered = registrationRepo.existsByEventIdAndUserId(dto.getEventId(), user.getId());
         if (alreadyRegistered) {
             throw new RuntimeException("User already registered for this event");
         }
@@ -75,7 +77,6 @@ public class RegistrationService {
         // 8. Return response DTO
         return registerMapper.toDTO(registration);
     }
-
     public List<Registration> getAttendees(Long eventId) {
 
         return registrationRepo.findByEventId(eventId);
@@ -87,11 +88,44 @@ public class RegistrationService {
         reg.setCheckedIn(true);
         return registrationRepo.save(reg);
     }
-    public Page<EventResponseDto> getRegisteredEventsByUser(Long userId, Pageable pageable) {
-        Page<Registration> registrations = registrationRepo.findByUserId(userId, pageable);
+
+    public Page<EventResponseDto> getRegisteredEventsByUser(User user, Pageable pageable) {
+        Page<Registration> registrations = registrationRepo.findByUserId(user.getId(), pageable);
         return registrations.map(reg -> eventMapper.toDto(reg.getEvent()));
     }
 
 
+    public List<RegisteredUserDTO> getRegisteredUsersByEvent(Long eventId, User currentUser) {
+
+        System.out.println("currentUser.getId(): " + currentUser.getId());
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+        System.out.println("event.getCreatedBy().getId(): " + event.getCreatedBy().getId());
+
+
+
+        if (event.getCreatedBy() == null) {
+            throw new RuntimeException("❌ Event has no createdBy set!");
+        }
+
+        if (!event.getCreatedBy().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to view registrations for this event.");
+        }
+
+        List<Registration> registrations = registrationRepo.findByEventId(eventId);
+
+        return registrations.stream()
+                .map(reg -> {
+                    User user = reg.getUser();
+                    UserProfile profile = user.getUserprofile(); // Optional
+                    RegisteredUserDTO dto = new RegisteredUserDTO();
+                    dto.setUserId(user.getId());
+                    dto.setUsername(user.getUsername());
+                    dto.setEmail(user.getEmail());
+                    dto.setFullName(profile != null ? profile.getFullName() : null);
+                    return dto;
+                })
+                .toList();
+    }
 
 }

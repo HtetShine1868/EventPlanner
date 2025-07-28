@@ -1,5 +1,6 @@
 package com.project.EventPlanner.features.user.domain.model;
 
+import com.project.EventPlanner.features.event.domain.model.Event;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.*;
@@ -12,7 +13,8 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "app_user")
@@ -36,7 +38,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private UserProfile profile;
+    private UserProfile userprofile;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private OrganizerApplication organizerApplication;

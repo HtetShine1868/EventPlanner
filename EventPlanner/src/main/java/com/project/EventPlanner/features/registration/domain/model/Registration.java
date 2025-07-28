@@ -3,15 +3,13 @@ package com.project.EventPlanner.features.registration.domain.model;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.user.domain.model.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -5,5 +5,4 @@ import lombok.Data;
 @Data
 public class RegistrationRequestDTO {
     private Long eventId;
-    private Long userId;
 }

@@ -1,23 +1,18 @@
 package com.project.EventPlanner.features.user.domain.mapper;
 
-
-import com.project.EventPlanner.features.user.domain.dto.UserProfileDto;
+import com.project.EventPlanner.features.user.domain.dto.UserProfileRequestDTO;
+import com.project.EventPlanner.features.user.domain.dto.UserProfileResponseDTO;
 import com.project.EventPlanner.features.user.domain.model.UserProfile;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
-import java.util.List;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface UserProfileMapper {
 
+    UserProfile toEntity(UserProfileRequestDTO dto);
+
     @Mapping(source = "user.id", target = "userId")
-    UserProfileDto toDto(UserProfile userProfile);
+    UserProfileResponseDTO toDto(UserProfile profile);
 
-
-    @Mapping(source = "userId", target = "user.id")
-    UserProfile toEntity(UserProfileDto userProfileDto);
-
-    List<UserProfileDto> toDTOList(List<UserProfile> profiles);
-
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateUserProfileFromDto(UserProfileRequestDTO dto, @MappingTarget UserProfile profile);
 }

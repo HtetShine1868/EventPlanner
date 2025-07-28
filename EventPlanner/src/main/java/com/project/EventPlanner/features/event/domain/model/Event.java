@@ -1,6 +1,7 @@
 package com.project.EventPlanner.features.event.domain.model;
 
 import com.project.EventPlanner.features.event.domain.EventStatus;
+import com.project.EventPlanner.features.registration.domain.model.Registration;
 import com.project.EventPlanner.features.user.domain.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,9 +9,12 @@ import lombok.*;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "event")
@@ -47,7 +51,13 @@ public class Event {
 
     private Integer capacity;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     private Integer registeredCount;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Registration> registrations = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EventStatus status = EventStatus.PENDING;

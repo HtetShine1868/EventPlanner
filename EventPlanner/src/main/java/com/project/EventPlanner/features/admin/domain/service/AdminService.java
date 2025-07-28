@@ -1,6 +1,11 @@
 package com.project.EventPlanner.features.admin.domain.service;
 
 import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
+import com.project.EventPlanner.features.event.domain.EventStatus;
+import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
+import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
+import com.project.EventPlanner.features.event.domain.model.Event;
+import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationReviewDTO;
 import com.project.EventPlanner.features.user.domain.mapper.OrganizerApplicationMapper;
@@ -16,35 +21,64 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-
 @RequiredArgsConstructor
 public class AdminService {
+
     private final OrganizerApplicationRepository applicationRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final OrganizerApplicationMapper mapper;
+    private final OrganizerApplicationMapper organizerMapper;
 
+    private final EventRepository eventRepository;
+    private final EventMapper eventMapper;
+
+    // ✅ Approve or reject organizer application
     public OrganizerApplicationDTO reviewOrganizerApplication(OrganizerApplicationReviewDTO dto) {
         OrganizerApplication app = applicationRepository.findById(dto.getApplicationId())
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-            app.setStatus(dto.getDecision());
+        app.setStatus(dto.getDecision());
 
-            // Set user role to ORGANIZER
+        if (dto.getDecision() == OrganizerApplicationStatus.APPROVED) {
             User user = app.getUser();
             Role organizerRole = roleRepository.findByName("ORGANIZER")
                     .orElseThrow(() -> new RuntimeException("ORGANIZER role not found"));
             user.setRole(organizerRole);
             userRepository.save(user);
-        return mapper.toDTO(applicationRepository.save(app));
-    }
-
-        public List<OrganizerApplicationDTO> getPendingApplications() {
-            return applicationRepository.findByStatus(OrganizerApplicationStatus.PENDING)
-                    .stream()
-                    .map(mapper::toDTO)
-                    .toList();
         }
 
+        return organizerMapper.toDTO(applicationRepository.save(app));
+    }
 
+    // ✅ Get all pending organizer applications
+    public List<OrganizerApplicationDTO> getPendingApplications() {
+        return applicationRepository.findByStatus(OrganizerApplicationStatus.PENDING)
+                .stream()
+                .map(organizerMapper::toDTO)
+                .toList();
+    }
+
+    // ✅ Approve event
+    public EventResponseDto approveEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+        event.setStatus(EventStatus.APPROVED);
+        return eventMapper.toDto(eventRepository.save(event));
+    }
+
+    // ✅ Reject event
+    public EventResponseDto rejectEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+        event.setStatus(EventStatus.REJECTED);
+        return eventMapper.toDto(eventRepository.save(event));
+    }
+
+    // ✅ Get pending events
+    public List<EventResponseDto> getPendingEvents() {
+        return eventRepository.findByStatus(EventStatus.PENDING)
+                .stream()
+                .map(eventMapper::toDto)
+                .toList();
+    }
 }

@@ -1,6 +1,8 @@
 package com.project.EventPlanner.features.registration.domain.repository;
 
+import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.registration.domain.model.Registration;
+import com.project.EventPlanner.features.user.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,5 +16,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     boolean existsByEventIdAndUserId(Long eventId, Long userId);
     List<Registration> findByUserId(Long userId);
     Page<Registration> findByUserId(Long userId, Pageable pageable);
+    boolean findByUserIdAndEventId(Long userId, Long eventId);
+    boolean existsByUserAndEvent(User user, Event event);
 
 }

@@ -11,6 +11,7 @@ import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationReviewDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,41 +26,37 @@ public class AdminController {
 
 
     //Organizer-application
-    @PutMapping("/organizer-application/review")
-    public ResponseEntity<OrganizerApplicationDTO> reviewApplication(@RequestBody OrganizerApplicationReviewDTO dto) {
+    @PostMapping("/organizer-application/review")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<OrganizerApplicationDTO> review(
+            @RequestBody OrganizerApplicationReviewDTO dto
+    ) {
         return ResponseEntity.ok(adminService.reviewOrganizerApplication(dto));
     }
+
     @GetMapping("/organizer-applications/pending")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<OrganizerApplicationDTO>> getPendingOrganizerApplications() {
         return ResponseEntity.ok(adminService.getPendingApplications());
     }
 
     //EventCrud
     @PutMapping("/{eventId}/approve")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventResponseDto> approveEvent(@PathVariable Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-
-        event.setStatus(EventStatus.APPROVED);
-        eventRepository.save(event);
-
-        return ResponseEntity.ok(eventMapper.toDto(event));
+        return ResponseEntity.ok(adminService.approveEvent(eventId));
     }
+
     @PutMapping("/{eventId}/reject")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventResponseDto> rejectEvent(@PathVariable Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-
-        event.setStatus(EventStatus.REJECTED);
-        eventRepository.save(event);
-
-        return ResponseEntity.ok(eventMapper.toDto(event));
+        return ResponseEntity.ok(adminService.rejectEvent(eventId));
     }
+
     @GetMapping("/pending")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<EventResponseDto> getPendingEvents() {
-        return eventRepository.findByStatus(EventStatus.PENDING)
-                .stream()
-                .map(eventMapper::toDto)
-                .toList();
+        return adminService.getPendingEvents();
     }
+
 }

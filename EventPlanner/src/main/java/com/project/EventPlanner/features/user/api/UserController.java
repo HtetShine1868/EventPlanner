@@ -29,7 +29,7 @@ public class UserController {
         return ResponseEntity.ok(userService.toDto(user));
     }
 
-    // ✅ Optional: get user by ID (admin or debug only)
+
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));

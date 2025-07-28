@@ -59,7 +59,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()       // ✅ Allow register + login
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/organizer-applications").hasAuthority("USER")
-
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess
