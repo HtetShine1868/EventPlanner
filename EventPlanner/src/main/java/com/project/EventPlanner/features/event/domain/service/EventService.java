@@ -6,6 +6,7 @@ import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.AgeGroupStatsDTO;
 import com.project.EventPlanner.features.event.domain.dto.EventRequestDto;
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
+import com.project.EventPlanner.features.event.domain.dto.GenderStatsDTO;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventCategoryRepository;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
@@ -235,5 +236,53 @@ public class EventService {
 
         return new PageImpl<>(pagedList, pageable, allResults.size());
     }
+
+    public Page<GenderStatsDTO> getGenderStatsForOrganizer(Long organizerId, Long eventIdFilter, Long categoryIdFilter, Pageable pageable) {
+        List<Event> events = eventRepository.findByCreatedById(organizerId);
+
+        if (eventIdFilter != null) {
+            events = events.stream()
+                    .filter(event -> event.getId().equals(eventIdFilter))
+                    .toList();
+        }
+
+        if (categoryIdFilter != null) {
+            events = events.stream()
+                    .filter(event -> event.getCategory() != null && event.getCategory().getId().equals(categoryIdFilter))
+                    .toList();
+        }
+
+        List<GenderStatsDTO> allResults = new ArrayList<>();
+
+        for (Event event : events) {
+            Map<String, Long> genderCounts = new LinkedHashMap<>();
+            genderCounts.put("MALE", 0L);
+            genderCounts.put("FEMALE", 0L);
+            genderCounts.put("OTHER", 0L);
+
+            for (Registration reg : event.getRegistrations()) {
+                User user = reg.getUser();
+                if (user != null && user.getUserprofile() != null && user.getUserprofile().getGender() != null) {
+                    String gender = user.getUserprofile().getGender().name(); // Assuming enum
+                    genderCounts.put(gender, genderCounts.getOrDefault(gender, 0L) + 1);
+                }
+            }
+
+            GenderStatsDTO dto = new GenderStatsDTO();
+            dto.setEventId(event.getId());
+            dto.setEventTitle(event.getTitle());
+            dto.setGenderCounts(genderCounts);
+
+            allResults.add(dto);
+        }
+
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allResults.size());
+        List<GenderStatsDTO> pagedList = allResults.subList(start, end);
+
+        return new PageImpl<>(pagedList, pageable, allResults.size());
+    }
+
 
 }

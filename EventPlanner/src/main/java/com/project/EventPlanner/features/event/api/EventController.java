@@ -2,10 +2,7 @@ package com.project.EventPlanner.features.event.api;
 
 import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
-import com.project.EventPlanner.features.event.domain.dto.AgeGroupStatsDTO;
-import com.project.EventPlanner.features.event.domain.dto.EventRequestDto;
-import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
-import com.project.EventPlanner.features.event.domain.dto.RegisteredUserDTO;
+import com.project.EventPlanner.features.event.domain.dto.*;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.event.domain.service.EventService;
 import com.project.EventPlanner.features.registration.domain.service.RegistrationService;
@@ -162,6 +159,22 @@ public class EventController {
 
         List<RegisteredUserDTO> users = registrationService.getRegisteredUsersByEvent(eventId, currentUser);
         return ResponseEntity.ok(users);
+    }
+
+
+    @PreAuthorize("hasAuthority('ORGANIZER')")
+    @GetMapping("/organizers/my/event-gender-analysis")
+    public ResponseEntity<Page<GenderStatsDTO>> getMyEventGenderAnalysis(
+            @AuthenticationPrincipal CustomUserDetail userDetail,
+            @RequestParam(value = "eventId", required = false) Long eventIdFilter,
+            @RequestParam(value = "categoryId", required = false) Long categoryIdFilter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Long organizerId = userDetail.getId();
+        Page<GenderStatsDTO> stats = eventService.getGenderStatsForOrganizer(organizerId, eventIdFilter, categoryIdFilter, pageable);
+        return ResponseEntity.ok(stats);
     }
 
 }
