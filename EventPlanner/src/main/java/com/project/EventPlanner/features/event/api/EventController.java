@@ -151,8 +151,6 @@ public class EventController {
         return ResponseEntity.ok(stats);
     }
 
-
-
     @GetMapping("/organizers/my/events/{eventId}/registrations")
     @PreAuthorize("hasAuthority('ORGANIZER')")
     public ResponseEntity<List<RegisteredUserDTO>> getRegisteredUsers(
@@ -165,7 +163,5 @@ public class EventController {
         List<RegisteredUserDTO> users = registrationService.getRegisteredUsersByEvent(eventId, currentUser);
         return ResponseEntity.ok(users);
     }
-
-
 
 }
