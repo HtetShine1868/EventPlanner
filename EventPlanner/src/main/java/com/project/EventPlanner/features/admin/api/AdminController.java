@@ -9,6 +9,7 @@ import com.project.EventPlanner.features.event.domain.repository.EventRepository
 import com.project.EventPlanner.features.event.domain.service.EventService;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationReviewDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,7 @@ public class AdminController {
 
 
     //Organizer-application
+
     @PostMapping("/organizer-application/review")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<OrganizerApplicationDTO> review(
@@ -41,18 +43,21 @@ public class AdminController {
     }
 
     //EventCrud
+    @Operation(summary = "Approve event", description = "Admin approves event")
     @PutMapping("/{eventId}/approve")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventResponseDto> approveEvent(@PathVariable Long eventId) {
         return ResponseEntity.ok(adminService.approveEvent(eventId));
     }
 
+    @Operation(summary = "Reject event", description = "Admin rejects event")
     @PutMapping("/{eventId}/reject")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventResponseDto> rejectEvent(@PathVariable Long eventId) {
         return ResponseEntity.ok(adminService.rejectEvent(eventId));
     }
 
+    @Operation(summary = "Get pending events", description = "Returns all pending events")
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('ADMIN')")
     public List<EventResponseDto> getPendingEvents() {

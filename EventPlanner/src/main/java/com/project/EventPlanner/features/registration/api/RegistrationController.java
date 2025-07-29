@@ -7,6 +7,9 @@ import com.project.EventPlanner.features.registration.domain.model.Registration;
 import com.project.EventPlanner.features.registration.domain.service.RegistrationService;
 import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.security.CustomUserDetail;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +30,10 @@ public class RegistrationController {
     private final RegistrationService registrationService;
 
     // 🔹 Register for an Event (Authenticated User)
+    @Operation(summary = "Register for event", description = "User registers for an event")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Registration successful")
+    })
     @PostMapping("/register")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<RegistrationResponseDTO> register(
@@ -42,6 +49,7 @@ public class RegistrationController {
     }
 
     // Get My Registered Events (Authenticated User)
+    @Operation(summary = "Get my registrations", description = "Authenticated user gets their registered events")
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<Page<EventResponseDto>> getMyRegistrations(

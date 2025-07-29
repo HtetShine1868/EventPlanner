@@ -8,6 +8,9 @@ import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.features.user.domain.repository.OrganizerApplicationRepository;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import com.project.EventPlanner.features.user.domain.service.OrganizerApplicationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,12 @@ public class OrganizerApplicationController {
     private final OrganizerApplicationRepository appRepository;
     private final UserRepository userRepository;
     private final OrganizerApplicationService organizerApplicationService;
+
+    @Operation(summary = "Apply to become organizer", description = "User submits organizer application")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Application submitted"),
+            @ApiResponse(responseCode = "400", description = "Already applied")
+    })
     @PostMapping
     public ResponseEntity<OrganizerApplication> apply(@RequestBody OrganizerApplication request,
                                                       @AuthenticationPrincipal UserDetails userDetails) {
@@ -47,6 +56,11 @@ public class OrganizerApplicationController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
+
+    @Operation(summary = "Get application by ID", description = "Fetch a specific organizer application")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Application found")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<OrganizerApplication> getById(@PathVariable Long id) {
         OrganizerApplication app = appRepository.findById(id)
@@ -54,6 +68,11 @@ public class OrganizerApplicationController {
         return ResponseEntity.ok(app);
     }
 
+
+    @Operation(summary = "List all applications", description = "Returns all organizer applications (Admin only)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Applications returned")
+    })
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<OrganizerApplicationDTO>> getAll() {
