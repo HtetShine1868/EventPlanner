@@ -10,6 +10,8 @@ import com.project.EventPlanner.features.event.domain.service.EventService;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationDTO;
 import com.project.EventPlanner.features.user.domain.dto.OrganizerApplicationReviewDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +29,10 @@ public class AdminController {
 
 
     //Organizer-application
-
+    @Operation(summary = "Review organizer application", description = "Approve or reject organizer application")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Application reviewed")
+    })
     @PostMapping("/organizer-application/review")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<OrganizerApplicationDTO> review(
@@ -36,6 +41,10 @@ public class AdminController {
         return ResponseEntity.ok(adminService.reviewOrganizerApplication(dto));
     }
 
+    @Operation(summary = "Get pending organizer applications", description = "Returns pending applications")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pending applications returned")
+    })
     @GetMapping("/organizer-applications/pending")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<OrganizerApplicationDTO>> getPendingOrganizerApplications() {
@@ -43,6 +52,7 @@ public class AdminController {
     }
 
     //EventCrud
+
     @Operation(summary = "Approve event", description = "Admin approves event")
     @PutMapping("/{eventId}/approve")
     @PreAuthorize("hasAuthority('ADMIN')")

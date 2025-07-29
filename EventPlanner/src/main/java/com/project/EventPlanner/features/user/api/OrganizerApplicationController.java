@@ -32,7 +32,7 @@ public class OrganizerApplicationController {
     private final UserRepository userRepository;
     private final OrganizerApplicationService organizerApplicationService;
 
-    @Operation(summary = "Apply to become organizer", description = "User submits organizer application")
+    @Operation(summary = "Apply to become organizer", description = "User submits organizer application to become the organizer")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Application submitted"),
             @ApiResponse(responseCode = "400", description = "Already applied")
@@ -62,6 +62,7 @@ public class OrganizerApplicationController {
             @ApiResponse(responseCode = "200", description = "Application found")
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<OrganizerApplication> getById(@PathVariable Long id) {
         OrganizerApplication app = appRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Application not found"));

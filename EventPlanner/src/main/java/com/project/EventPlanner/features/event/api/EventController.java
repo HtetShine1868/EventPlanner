@@ -11,6 +11,7 @@ import com.project.EventPlanner.features.user.domain.model.User;
 import com.project.EventPlanner.features.user.domain.repository.OrganizerApplicationRepository;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import com.project.EventPlanner.security.CustomUserDetail;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,7 @@ public class EventController {
     private final EventMapper eventMapper;
     private final RegistrationService registrationService;
 
+    @Operation(summary = "Create event", description = "Organizer creates a new event,and become a pending event at first and after the admin approve it become shown and register by user")
     @PostMapping
     @PreAuthorize("hasAuthority('ORGANIZER')")
     public ResponseEntity<EventResponseDto> createEvent(@RequestBody EventRequestDto dto,
@@ -47,6 +49,7 @@ public class EventController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get approved events", description = "Get list of all approved events with pagination")
     @GetMapping
     public ResponseEntity<Page<EventResponseDto>> getApprovedEvents(
             @RequestParam(defaultValue = "0") int page,
@@ -58,10 +61,15 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+
+    @Operation(summary = "Get event by ID", description = "Fetch a single event by its ID")
     @GetMapping("/{id}")
     public ResponseEntity<EventResponseDto> getEventById(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
+
+
+    @Operation(summary = "Update event", description = "Organizer or admin updates an event")
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ORGANIZER') or hasAuthority('ADMIN')")
     public ResponseEntity<EventResponseDto> updateEvent(@PathVariable Long id,
@@ -71,13 +79,14 @@ public class EventController {
         return ResponseEntity.ok(updated);
     }
 
+    @Operation(summary = "Delete event", description = "Delete an event by ID")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ORGANIZER') or hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
-
+    @Operation(summary = "Get organizer's events", description = "Fetch events created by a specific approved organizer")
     @GetMapping("/organizers/{organizerId}/events")
     public ResponseEntity<Page<EventResponseDto>> getEventsByOrganizer(
             @PathVariable Long organizerId,
@@ -104,6 +113,7 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+    @Operation(summary = "Search events", description = "Filter events by category and location")
     @GetMapping("/search")
     public ResponseEntity<Page<EventResponseDto>> filterEventsByCategoryAndLocation(
             @RequestParam(required = false) Long categoryId,
@@ -116,6 +126,8 @@ public class EventController {
         Page<EventResponseDto> filteredEvents = eventService.filterEventsByCategoryAndLocation(categoryId, location,latitude,longitude, page, size);
         return ResponseEntity.ok(filteredEvents);
     }
+
+    @Operation(summary = "Trending events", description = "Get top trending events, optionally filtered by category")
     @GetMapping("/trending")
     public ResponseEntity<List<EventResponseDto>> getTrendingEvents(
             @RequestParam(required = false) Long categoryId,
@@ -133,6 +145,8 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+
+    @Operation(summary = "Age analysis", description = "Get age distribution of registered users for organizer's events")
     @PreAuthorize("hasAuthority('ORGANIZER')")
     @GetMapping("/organizers/my/event-age-analysis")
     public ResponseEntity<Page<AgeGroupStatsDTO>> getMyEventAgeAnalysis(
@@ -148,6 +162,7 @@ public class EventController {
         return ResponseEntity.ok(stats);
     }
 
+    @Operation(summary = "View registered users", description = "Get list of registered users for a specific event")
     @GetMapping("/organizers/my/events/{eventId}/registrations")
     @PreAuthorize("hasAuthority('ORGANIZER')")
     public ResponseEntity<List<RegisteredUserDTO>> getRegisteredUsers(
@@ -160,8 +175,7 @@ public class EventController {
         List<RegisteredUserDTO> users = registrationService.getRegisteredUsersByEvent(eventId, currentUser);
         return ResponseEntity.ok(users);
     }
-
-
+    @Operation(summary = "Gender analysis", description = "Get gender distribution of registered users for organizer's events")
     @PreAuthorize("hasAuthority('ORGANIZER')")
     @GetMapping("/organizers/my/event-gender-analysis")
     public ResponseEntity<Page<GenderStatsDTO>> getMyEventGenderAnalysis(
