@@ -12,6 +12,8 @@ public class FeedbackResponseDTO {
     private String eventTitle;
     private Rating rating;
     private String comment;
+    private String sentiment;
+    private Double sentimentScore;
     private LocalDateTime createdAt;
 }
 

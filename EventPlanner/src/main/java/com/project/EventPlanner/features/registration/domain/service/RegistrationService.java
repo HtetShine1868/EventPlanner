@@ -6,17 +6,14 @@ import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
 import com.project.EventPlanner.features.event.domain.dto.RegisteredUserDTO;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
-import com.project.EventPlanner.features.registration.domain.RegisterMapper;
+import com.project.EventPlanner.features.registration.domain.mapper.RegisterMapper;
 import com.project.EventPlanner.features.registration.domain.dto.RegistrationRequestDTO;
 import com.project.EventPlanner.features.registration.domain.dto.RegistrationResponseDTO;
 import com.project.EventPlanner.features.registration.domain.model.Registration;
 import com.project.EventPlanner.features.registration.domain.repository.RegistrationRepository;
-import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
 import com.project.EventPlanner.features.user.domain.model.User;
-import com.project.EventPlanner.features.event.domain.model.Event;
 
 import com.project.EventPlanner.features.user.domain.model.UserProfile;
-import com.project.EventPlanner.features.user.domain.repository.OrganizerApplicationRepository;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

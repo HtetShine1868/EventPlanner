@@ -1,7 +1,9 @@
 package com.project.EventPlanner.features.feedback.api;
 
+import com.project.EventPlanner.features.feedback.domain.dto.FeedbackAnalysisDTO;
 import com.project.EventPlanner.features.feedback.domain.dto.FeedbackRequestDTO;
 import com.project.EventPlanner.features.feedback.domain.dto.FeedbackResponseDTO;
+import com.project.EventPlanner.features.feedback.domain.dto.FeedbackSummaryDTO;
 import com.project.EventPlanner.features.feedback.domain.service.FeedbackService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,7 +27,7 @@ public class FeedbackController {
 
 
     // Only authenticated users can submit feedback
-    @Operation(summary = "Submit feedback", description = "User submits feedback for an event")
+    @Operation(summary = "Submit feedback", description = "User submits feedback for an event,and get the sentiment from the comment for analysis")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Feedback submitted")
     })
@@ -49,5 +51,18 @@ public class FeedbackController {
         List<FeedbackResponseDTO> feedbacks = feedbackService.getFeedbacksForEvent(eventId);
         return ResponseEntity.ok(feedbacks);
     }
+    @GetMapping("/event/{eventId}/analysis")
+    public ResponseEntity<FeedbackAnalysisDTO> analyzeFeedback(
+            @PathVariable Long eventId
+    ) {
+        return ResponseEntity.ok(feedbackService.analyzeFeedbackForEvent(eventId));
+    }
+
+    @GetMapping("/event/{eventId}/feedback-summary")
+    public ResponseEntity<FeedbackSummaryDTO> getFeedbackSummary(@PathVariable Long eventId) {
+        return ResponseEntity.ok(feedbackService.getFeedbackSummary(eventId));
+    }
+
+
 }
 

@@ -86,6 +86,7 @@ public class EventController {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
+
     @Operation(summary = "Get organizer's events", description = "Fetch events created by a specific approved organizer")
     @GetMapping("/organizers/{organizerId}/events")
     public ResponseEntity<Page<EventResponseDto>> getEventsByOrganizer(

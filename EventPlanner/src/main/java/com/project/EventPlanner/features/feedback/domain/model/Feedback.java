@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,8 +30,14 @@ public class Feedback {
     @Enumerated(EnumType.STRING)
     private Rating rating;
 
-
     private String comment;
+
+    @Enumerated(EnumType.STRING)
+    private Sentiment sentiment;
+
+    // Store sentiment confidence score (percentage)
+    private Double sentimentScore;
+
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }
