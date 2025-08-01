@@ -1,15 +1,11 @@
-package com.project.EventPlanner.features.chatbot.dto;
+package com.project.EventPlanner.features.chatbot.domain.dto;
 
 import lombok.Data;
 
 @Data
 public class ChatbotRequest {
-    private String text;
+    private String question;
 
-    public ChatbotRequest() {}
-    public ChatbotRequest(String text) { this.text = text; }
 
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
 }
 
