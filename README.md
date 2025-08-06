@@ -25,28 +25,26 @@ This is the **backend API** for the Event Management System (EMS), built with **
 
 ## 🗂️ Project Structure
 
-src/
-├── main/
-│ ├── java/
-│ │ └── com.project.EventPlanner/
-│ │ ├── common/
-│ │ ├── config/
-│ │ │ ├── AppConfig.java
-│ │ │ └── WebSecurityConfig.java
-│ │ ├── exception/
-│ │ ├── features/
-│ │ │ ├── admin/
-│ │ │ ├── auth/
-│ │ │ ├── chatbot/
-│ │ │ ├── event/
-│ │ │ ├── feedback/
-│ │ │ ├── registration/
-│ │ │ └── user/
-│ │ ├── security/
-│ │ │ ├── CustomUserDetail.java
-│ │ │ ├── CustomUserDetailService.java
-│ │ │ └── SecurityConfig.java
-│ │ └── EventPlannerApplication.java
-│ └── resources/
-└── test/
-
+📦src
+┣ 📂main
+┃ ┣ 📂java
+┃ ┃ ┗ 📂com.project.EventPlanner
+┃ ┃ ┣ 📂common
+┃ ┃ ┣ 📂config
+┃ ┃ ┃ ┣ 📜AppConfig.java
+┃ ┃ ┃ ┗ 📜WebSecurityConfig.java
+┃ ┃ ┣ 📂exception
+┃ ┃ ┣ 📂features
+┃ ┃ ┃ ┣ 📂admin
+┃ ┃ ┃ ┣ 📂auth
+┃ ┃ ┃ ┣ 📂chatbot
+┃ ┃ ┃ ┣ 📂event
+┃ ┃ ┃ ┣ 📂feedback
+┃ ┃ ┃ ┣ 📂registration
+┃ ┃ ┃ ┗ 📂user
+┃ ┃ ┣ 📂security
+┃ ┃ ┃ ┣ 📜CustomUserDetail.java
+┃ ┃ ┃ ┣ 📜CustomUserDetailService.java
+┃ ┃ ┃ ┗ 📜SecurityConfig.java
+┃ ┃ ┗ 📜EventPlannerApplication.java
+┃
