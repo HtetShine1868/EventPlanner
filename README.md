@@ -16,7 +16,7 @@ This is the **backend API** for the Event Management System (EMS), built with **
 
 | Layer        | Technology        |
 |--------------|-------------------|
-| Language     | Java 17+          |
+| Language     | Java 21+          |
 | Framework    | Spring Boot       |
 | Database     | PostgreSQL        |
 | ORM          | Hibernate (JPA)   |
