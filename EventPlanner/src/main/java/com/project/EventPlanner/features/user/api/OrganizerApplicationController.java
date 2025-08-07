@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/organizer-applications")
+@RequestMapping("/api/organizer-applications")
 @RequiredArgsConstructor
 public class OrganizerApplicationController {
 
