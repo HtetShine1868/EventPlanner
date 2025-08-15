@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +36,11 @@ public class FeedbackService {
     private final RegistrationRepository registrationRepo;
     private final SentimentClient sentimentClient;
 
-    public FeedbackResponseDTO createFeedback(FeedbackRequestDTO dto, String username) {
+    public FeedbackResponseDTO createFeedback(Long eventId,FeedbackRequestDTO dto, String username) {
         User user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Event event = eventRepo.findById(dto.getEventId())
+        Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
         boolean registered = registrationRepo.existsByEventIdAndUserId(event.getId(), user.getId());
@@ -79,6 +80,20 @@ public class FeedbackService {
         List<Feedback> feedbacks = feedbackRepo.findByEventId(eventId);
         return feedbackMapper.toDTOs(feedbacks);
     }
+
+    public FeedbackResponseDTO getUserFeedbackForEvent(Long eventId, String username) {
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Feedback feedback = feedbackRepo.findByUserIdAndEventId(user.getId(), eventId)
+                .orElse(null);
+
+        if (feedback == null) {
+            return null;
+        }
+        return feedbackMapper.toDTO(feedback);
+    }
+
 
     public FeedbackAnalysisDTO analyzeFeedbackForEvent(Long eventId) {
         List<Feedback> feedbacks = feedbackRepo.findByEventId(eventId);

@@ -24,17 +24,17 @@ public interface EventRepository extends
         List<Event> findByTitleContainingIgnoreCase(String keyword);
         List<Event> findByStatus(EventStatus status);
         List<Event> findByCreatedById(Long organizerId);
-
+        Page<Event> findByOrganizerIdOrderByStartTimeDesc(Long organizerId, Pageable pageable);
         Page<Event> findByStatus(EventStatus status, Pageable pageable);
 
         Page<Event> findByOrganizerId(Long organizerId, Pageable pageable);
 
+        Page<Event> findByCategoryIdAndLocationContainingIgnoreCaseAndStatus(Long categoryId, String location, EventStatus status, Pageable pageable);
+
         Page<Event> findByCategoryIdAndStatus(Long categoryId, EventStatus status, Pageable pageable);
 
-        Page<Event> findByLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(String location,Double latitude,Double longitude, EventStatus status, Pageable pageable);
+        Page<Event> findByLocationContainingIgnoreCaseAndStatus(String location, EventStatus status, Pageable pageable);
 
-        Page<Event> findByCategoryIdAndLocationIsNotNullAndLocationContainingIgnoreCaseAndStatus(
-                Long categoryId, String location,Double latitude,Double longitude, EventStatus status, Pageable pageable);
 
         Optional<Event> findById(Long id);
 
@@ -92,5 +92,7 @@ AND (e.status = 'APPROVED' OR e.status = 'PENDING')
     ORDER BY SIZE(e.registrations) DESC
 """)
         List<Event> findTopEventByOrganizer(@Param("organizerId") Long organizerId, Pageable pageable);
+
+
 
 }

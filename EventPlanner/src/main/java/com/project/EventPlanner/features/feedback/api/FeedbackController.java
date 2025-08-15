@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/feedbacks")
@@ -32,12 +33,13 @@ public class FeedbackController {
             @ApiResponse(responseCode = "201", description = "Feedback submitted")
     })
     @PreAuthorize("hasAuthority('USER')")
-    @PostMapping
+    @PostMapping("/{eventId}/feedback")
     public ResponseEntity<FeedbackResponseDTO> submitFeedback(
+            @PathVariable Long eventId,
             @RequestBody FeedbackRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        FeedbackResponseDTO response = feedbackService.createFeedback(dto, userDetails.getUsername());
+        FeedbackResponseDTO response = feedbackService.createFeedback(eventId,dto, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -46,19 +48,36 @@ public class FeedbackController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Feedbacks retrieved")
     })
-    @GetMapping("/event/{eventId}")
+    @GetMapping("/{eventId}/feedback")
     public ResponseEntity<List<FeedbackResponseDTO>> getFeedbacksForEvent(@PathVariable Long eventId) {
         List<FeedbackResponseDTO> feedbacks = feedbackService.getFeedbacksForEvent(eventId);
         return ResponseEntity.ok(feedbacks);
     }
-    @GetMapping("/event/{eventId}/analysis")
+
+
+    @GetMapping("/{eventId}/my-feedback")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<FeedbackResponseDTO> getUserFeedbackForEvent(
+            @PathVariable Long eventId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            FeedbackResponseDTO feedback = feedbackService.getUserFeedbackForEvent(eventId, userDetails.getUsername());
+            return ResponseEntity.ok(feedback);
+        } catch (NoSuchElementException e) {
+            // User has not submitted feedback yet
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @GetMapping("/{eventId}/analysis")
     public ResponseEntity<FeedbackAnalysisDTO> analyzeFeedback(
             @PathVariable Long eventId
     ) {
         return ResponseEntity.ok(feedbackService.analyzeFeedbackForEvent(eventId));
     }
 
-    @GetMapping("/event/{eventId}/feedback-summary")
+    @GetMapping("/{eventId}/feedback-summary")
     public ResponseEntity<FeedbackSummaryDTO> getFeedbackSummary(@PathVariable Long eventId) {
         return ResponseEntity.ok(feedbackService.getFeedbackSummary(eventId));
     }

@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class FeedbackRequestDTO {
-    private Long eventId;
     private Rating rating;
     private String comment;
 }

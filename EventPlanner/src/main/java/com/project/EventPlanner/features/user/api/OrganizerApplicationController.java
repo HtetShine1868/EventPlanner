@@ -41,13 +41,13 @@ public class OrganizerApplicationController {
     public ResponseEntity<OrganizerApplication> apply(@RequestBody OrganizerApplication request,
                                                       @AuthenticationPrincipal UserDetails userDetails) {
 
-        // ✅ Load user from DB
+        //  Load user from DB
         User currentUser = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (appRepository.existsByUser(currentUser)) {
             throw new RuntimeException("You have already applied to become an organizer.");
         }
-        // ✅ Set required fields
+        // Set required fields
         request.setUser(currentUser);
         request.setAppliedAt(LocalDateTime.now());
         request.setStatus(OrganizerApplicationStatus.PENDING);

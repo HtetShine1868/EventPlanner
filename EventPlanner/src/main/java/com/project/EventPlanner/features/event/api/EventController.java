@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,7 +51,7 @@ public class EventController {
     }
 
     @Operation(summary = "Get approved events", description = "Get list of all approved events with pagination")
-    @GetMapping
+    @GetMapping("/approve")
     public ResponseEntity<Page<EventResponseDto>> getApprovedEvents(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -87,31 +88,19 @@ public class EventController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get organizer's events", description = "Fetch events created by a specific approved organizer")
-    @GetMapping("/organizers/{organizerId}/events")
-    public ResponseEntity<Page<EventResponseDto>> getEventsByOrganizer(
-            @PathVariable Long organizerId,
+
+    @Operation(summary = "Get organizer's events with filters")
+    @GetMapping("/myevent")
+    public Page<EventResponseDto> getMyEvents(
+            @RequestParam Long organizerId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "6") int size
     ) {
-        // Step 1: Validate if the user exists
-        User user = userRepository.findById(organizerId)
-                .orElseThrow(() -> new RuntimeException("User with ID " + organizerId + " does not exist."));
-
-        // Step 2: Validate if the user has applied as an organizer
-        OrganizerApplication app = organizerApplicationRepository.findByUserId(organizerId)
-                .orElseThrow(() -> new RuntimeException("Organizer not found. This user has never applied as an organizer."));
-
-        // Step 3: Check if the organizer is approved
-        if (!app.getStatus().equals(OrganizerApplicationStatus.APPROVED)) {
-            throw new RuntimeException("Organizer is not approved. Access to events is not allowed.");
-        }
-
-        // Step 4: Fetch events by this approved organizer
-        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").descending());
-        Page<EventResponseDto> events = eventService.getEventsByOrganizer(organizerId, pageable);
-
-        return ResponseEntity.ok(events);
+        Pageable pageable = PageRequest.of(page, size);
+        return eventService.getMyEvents(organizerId, status, categoryId, search, pageable);
     }
 
     @Operation(summary = "Search events", description = "Filter events by category and location")
