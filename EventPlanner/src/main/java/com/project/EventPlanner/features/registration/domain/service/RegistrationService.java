@@ -9,6 +9,7 @@ import com.project.EventPlanner.features.event.domain.repository.EventRepository
 import com.project.EventPlanner.features.registration.domain.mapper.RegisterMapper;
 import com.project.EventPlanner.features.registration.domain.dto.RegistrationRequestDTO;
 import com.project.EventPlanner.features.registration.domain.dto.RegistrationResponseDTO;
+import com.project.EventPlanner.features.registration.domain.dto.EventAnalysisDTO;
 import com.project.EventPlanner.features.registration.domain.model.Registration;
 import com.project.EventPlanner.features.registration.domain.repository.RegistrationRepository;
 import com.project.EventPlanner.features.user.domain.model.User;
@@ -22,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -125,4 +127,34 @@ public class RegistrationService {
                 .toList();
     }
 
+
+
+    public EventAnalysisDTO getSimpleAnalysis(Long eventId) {
+        long total = registrationRepo.countAttendeesByEventId(eventId);
+
+        // Gender counts -> with percentages
+        List<Object[]> genderRows = registrationRepo.genderCountsByEvent(eventId);
+        List<EventAnalysisDTO.GenderStat> genderStats = new ArrayList<>();
+        for (Object[] row : genderRows) {
+            String gender = row[0] == null ? "UNKNOWN" : row[0].toString();
+            long count = ((Number) row[1]).longValue();
+            double pct = (total > 0) ? (count * 100.0 / total) : 0.0;
+            genderStats.add(new EventAnalysisDTO.GenderStat(gender, count, pct));
+        }
+
+        // Age group counts -> pick the most common
+        String mostCommonAgeGroup = "N/A";
+        long maxCount = -1;
+        List<Object[]> ageRows = registrationRepo.ageGroupCountsByEvent(eventId);
+        for (Object[] row : ageRows) {
+            String ageGroup = row[0] == null ? "UNKNOWN" : row[0].toString();
+            long count = ((Number) row[1]).longValue();
+            if (count > maxCount) {
+                maxCount = count;
+                mostCommonAgeGroup = ageGroup;
+            }
+        }
+
+        return new EventAnalysisDTO(eventId, total, genderStats, mostCommonAgeGroup);
+    }
 }

@@ -2,13 +2,17 @@ package com.project.EventPlanner.features.event.domain.dto;
 
 import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.model.Event;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventResponseDto {
     private Long id;
     private String title;

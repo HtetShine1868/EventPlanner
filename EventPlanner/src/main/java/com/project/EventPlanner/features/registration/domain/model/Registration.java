@@ -2,6 +2,7 @@ package com.project.EventPlanner.features.registration.domain.model;
 
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.user.domain.model.User;
+import com.project.EventPlanner.features.user.domain.model.UserProfile;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class Registration {
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
+
 
     @Column(nullable = false)
     private LocalDateTime registerAt = LocalDateTime.now();

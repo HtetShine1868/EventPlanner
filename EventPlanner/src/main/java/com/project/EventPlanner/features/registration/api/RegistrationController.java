@@ -1,6 +1,7 @@
 package com.project.EventPlanner.features.registration.api;
 
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
+import com.project.EventPlanner.features.registration.domain.dto.EventAnalysisDTO;
 import com.project.EventPlanner.features.registration.domain.dto.RegistrationRequestDTO;
 import com.project.EventPlanner.features.registration.domain.dto.RegistrationResponseDTO;
 import com.project.EventPlanner.features.registration.domain.model.Registration;
@@ -61,5 +62,7 @@ public class RegistrationController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("registerAt").descending());
         return ResponseEntity.ok(registrationService.getRegisteredEventsByUser(currentUser, pageable));
     }
+
+
 
 }

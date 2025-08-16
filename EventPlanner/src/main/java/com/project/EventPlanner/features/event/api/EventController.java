@@ -5,6 +5,7 @@ import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.*;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.event.domain.service.EventService;
+import com.project.EventPlanner.features.registration.domain.dto.EventAnalysisDTO;
 import com.project.EventPlanner.features.registration.domain.service.RegistrationService;
 import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
 import com.project.EventPlanner.features.user.domain.model.User;
@@ -121,9 +122,8 @@ public class EventController {
     @GetMapping("/trending")
     public ResponseEntity<List<EventResponseDto>> getTrendingEvents(
             @RequestParam(required = false) Long categoryId,
-              @RequestParam(defaultValue = "2") int limit
+            @RequestParam(defaultValue = "5") int limit  // default top 5
     ) {
-
         List<EventResponseDto> events;
 
         if (categoryId != null) {
@@ -134,6 +134,7 @@ public class EventController {
 
         return ResponseEntity.ok(events);
     }
+
 
 
     @Operation(summary = "Age analysis", description = "Get age distribution of registered users for organizer's events")
@@ -181,4 +182,9 @@ public class EventController {
         return ResponseEntity.ok(stats);
     }
 
+    @GetMapping("/{eventId}/simple-analysis")
+    public ResponseEntity<EventAnalysisDTO> getSimpleAnalysis(@PathVariable Long eventId) {
+        EventAnalysisDTO dto = registrationService.getSimpleAnalysis(eventId);
+        return ResponseEntity.ok(dto);
+    }
 }
