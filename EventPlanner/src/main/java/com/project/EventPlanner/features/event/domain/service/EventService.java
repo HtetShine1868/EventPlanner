@@ -198,39 +198,19 @@ public class EventService {
         return filteredEvents.map(eventMapper::toDto);
     }
 
-
-
     public List<EventResponseDto> getTopTrendingEvents(int limit) {
-        List<Event> allEvents = eventRepository.findAll(); // Or filter upcoming events
-
-        // Sort by registrations desc, then startTime asc (tie-breaker)
-        List<Event> sorted = allEvents.stream()
-                .sorted(Comparator
-                        .comparing(Event::getRegisteredCount).reversed()
-                        .thenComparing(Event::getStartTime))
-                .limit(limit)
-                .collect(Collectors.toList());
-
-        return sorted.stream()
-                .map(event -> modelMapper.map(event, EventResponseDto.class))
+        Pageable pageable = PageRequest.of(0, limit);
+        return eventRepository.findTopTrendingEvents(pageable)
+                .stream().map(event -> modelMapper.map(event, EventResponseDto.class))
                 .collect(Collectors.toList());
     }
 
     public List<EventResponseDto> getTopTrendingEventsByCategory(Long categoryId, int limit) {
-        List<Event> filteredEvents = eventRepository.findByCategoryId(categoryId);
-
-        List<Event> sorted = filteredEvents.stream()
-                .sorted(Comparator
-                        .comparing(Event::getRegisteredCount).reversed()
-                        .thenComparing(Event::getStartTime))
-                .limit(limit)
-                .collect(Collectors.toList());
-
-        return sorted.stream()
-                .map(event -> modelMapper.map(event, EventResponseDto.class))
+        Pageable pageable = PageRequest.of(0, limit);
+        return eventRepository.findTopTrendingEventsByCategory(categoryId, pageable)
+                .stream().map(event -> modelMapper.map(event, EventResponseDto.class))
                 .collect(Collectors.toList());
     }
-
 
     public EventResponseDto getMostRegisteredEvent(Long organizerId) {
         Pageable limit = PageRequest.of(0, 1);

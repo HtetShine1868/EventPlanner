@@ -10,6 +10,7 @@ public class OrganizerApplicationDTO {
     private Long id;
     private Long userId;
     private String organizerName;
+    private String linkedIn;
     private OrganizerApplicationStatus status;
 
     private LocalDateTime appliedAt;

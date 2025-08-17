@@ -4,6 +4,7 @@ import com.project.EventPlanner.features.auth.domain.dto.AuthRequest;
 import com.project.EventPlanner.features.auth.domain.dto.AuthResponse;
 import com.project.EventPlanner.features.auth.domain.service.AuthService;
 import com.project.EventPlanner.features.user.domain.dto.UserRegisterDto;
+import com.project.EventPlanner.features.user.domain.model.VerifyEmailDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,16 +36,19 @@ import org.springframework.web.bind.annotation.RestController;
         }
 
 
-        @Operation(summary = "Register", description = "Register a new user")
-        @ApiResponses({
-                @ApiResponse(responseCode = "200", description = "User registered successfully"),
-                @ApiResponse(responseCode = "400", description = "Validation failed")
-        })
-        @PostMapping("/register")
-        public ResponseEntity<AuthResponse> register(@RequestBody UserRegisterDto request) {
-            AuthResponse response = authService.register(request);
+        @PostMapping("/register-request")
+        public ResponseEntity<String> registerRequest(@RequestBody UserRegisterDto dto) {
+            authService.registerRequest(dto);
+            return ResponseEntity.ok("Verification code sent to your email");
+        }
+
+        /**
+         * Step 2: Verify OTP
+         * Verifies code and creates real user, returns JWT
+         */
+        @PostMapping("/verify-email")
+        public ResponseEntity<AuthResponse> verifyEmail(@RequestBody VerifyEmailDTO dto) {
+            AuthResponse response = authService.verifyEmail(dto);
             return ResponseEntity.ok(response);
         }
     }
-
-

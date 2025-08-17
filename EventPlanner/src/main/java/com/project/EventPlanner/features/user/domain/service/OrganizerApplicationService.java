@@ -35,7 +35,6 @@ public class OrganizerApplicationService {
             throw new RuntimeException("You have already applied to become an organizer.");
         }
         application.setUser(user);
-
         application.setStatus(OrganizerApplicationStatus.PENDING);
         application.setAppliedAt(LocalDateTime.now());
 
