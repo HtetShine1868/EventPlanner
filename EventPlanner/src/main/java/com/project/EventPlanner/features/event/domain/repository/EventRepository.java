@@ -24,6 +24,8 @@ public interface EventRepository extends
         List<Event> findByTitleContainingIgnoreCase(String keyword);
         List<Event> findByStatus(EventStatus status);
         List<Event> findByCreatedById(Long organizerId);
+        List<Event> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
+
         Page<Event> findByOrganizerIdOrderByStartTimeDesc(Long organizerId, Pageable pageable);
         Page<Event> findByStatus(EventStatus status, Pageable pageable);
 

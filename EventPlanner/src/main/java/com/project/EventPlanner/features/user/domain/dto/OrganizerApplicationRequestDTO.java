@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class OrganizerApplicationRequestDTO {
-    private Long userId;
     private String organizerName;
+    private String email;
+    private String description;
 }

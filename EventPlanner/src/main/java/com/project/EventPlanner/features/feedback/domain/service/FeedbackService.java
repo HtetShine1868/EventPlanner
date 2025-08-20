@@ -131,6 +131,7 @@ public class FeedbackService {
     public FeedbackSummaryDTO getFeedbackSummary(Long eventId) {
         List<Feedback> feedbacks = feedbackRepo.findByEventId(eventId);
 
+        int total = feedbacks.size();
         int positive = 0, neutral = 0, negative = 0;
 
         for (Feedback f : feedbacks) {
@@ -145,6 +146,12 @@ public class FeedbackService {
         summary.setPositiveCount(positive);
         summary.setNeutralCount(neutral);
         summary.setNegativeCount(negative);
+
+        if (total > 0) {
+            summary.setPositivePercent((positive * 100.0) / total);
+            summary.setNeutralPercent((neutral * 100.0) / total);
+            summary.setNegativePercent((negative * 100.0) / total);
+        }
 
         return summary;
     }

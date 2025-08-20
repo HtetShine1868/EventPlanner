@@ -18,21 +18,29 @@ public class ChatbotService {
 
 
     public ChatbotResponse getChatbotReply(ChatbotRequest request) {
-        String flaskUrl = "http://localhost:5000/chatbot";
+        String flaskUrl = "http://localhost:5000/chatbot"; // Flask FAISS endpoint
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<ChatbotRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<ChatbotResponse> response = restTemplate.exchange(
-                flaskUrl,
-                HttpMethod.POST,
-                entity,
-                ChatbotResponse.class
-        );
+        try {
+            ResponseEntity<ChatbotResponse> response = restTemplate.exchange(
+                    flaskUrl,
+                    HttpMethod.POST,
+                    entity,
+                    ChatbotResponse.class
+            );
 
-        return response.getBody();
+            return response.getBody();
+
+        } catch (Exception e) {
+            // fallback in case Flask fails
+            ChatbotResponse fallback = new ChatbotResponse();
+            fallback.setAnswer("Sorry, the chatbot service is temporarily unavailable.");
+            return fallback;
+        }
     }
 }
 

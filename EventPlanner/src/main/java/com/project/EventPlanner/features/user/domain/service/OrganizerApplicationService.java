@@ -25,18 +25,24 @@ public class OrganizerApplicationService {
     private final RoleRepository roleRepository;
     private final OrganizerApplicationMapper mapper;
 
-    public OrganizerApplicationDTO createApplication(OrganizerApplicationRequestDTO dto) {
-        OrganizerApplication application = mapper.toEntity(dto);
-
-        User user = userRepository.findById(dto.getUserId())
+    public OrganizerApplicationDTO createApplication(OrganizerApplicationRequestDTO dto, String username) {
+        // Find logged-in user
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Check if already applied
         if (appRepository.existsByUser(user)) {
             throw new RuntimeException("You have already applied to become an organizer.");
         }
+
+        // Map DTO -> Entity
+        OrganizerApplication application = mapper.toEntity(dto);
         application.setUser(user);
         application.setStatus(OrganizerApplicationStatus.PENDING);
         application.setAppliedAt(LocalDateTime.now());
+        application.setOrganizerName(dto.getOrganizerName());
+        application.setEmail(dto.getEmail());
+        application.setDescription(dto.getDescription());
 
         OrganizerApplication savedApp = appRepository.save(application);
         return mapper.toDTO(savedApp);

@@ -23,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class RegistrationService {
     private final EventRepository eventRepository;
     private final RegisterMapper registerMapper;
     private final EventMapper eventMapper;
+    private final EmailService emailService;
 
 
     public RegistrationResponseDTO registerUserToEvent(RegistrationRequestDTO dto, User currentUser) {
@@ -73,7 +75,16 @@ public class RegistrationService {
         event.setRegisteredCount(updatedCount);
         eventRepository.save(event);
 
-        // 8. Return response DTO
+        // 8. Send email notification
+        String subject = "Event Registration Confirmation: " + event.getTitle();
+        String text = "Hi " + user.getUsername() + ",\n\n" +
+                "You have successfully registered for the event: '" + event.getTitle() + "'.\n" +
+                "Event Date & Time: " + event.getStartTime().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))
+                + "\n" +
+                "Location: " + (event.getLocation() != null ? event.getLocation() : "Online") + "\n\n" +
+                "We look forward to seeing you there!";
+        emailService.sendEmail(user.getEmail(), subject, text);
+        // 9. Return response DTO
         return registerMapper.toDTO(registration);
     }
     public List<Registration> getAttendees(Long eventId) {

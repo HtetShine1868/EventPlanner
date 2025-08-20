@@ -26,6 +26,10 @@ public class OrganizerApplication {
 
     private String organizerName;
 
+    private String Description;
+
+    private String email;
+
     @Enumerated(EnumType.STRING)
     private OrganizerApplicationStatus status = OrganizerApplicationStatus.PENDING;
 

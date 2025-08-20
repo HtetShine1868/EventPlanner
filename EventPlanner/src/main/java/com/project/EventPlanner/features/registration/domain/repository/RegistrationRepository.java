@@ -15,10 +15,11 @@ import java.util.Optional;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     List<Registration> findByEventId(Long eventId);
-    Optional<Registration> findByEventIdAndUserId(Long eventId, Long userId);
-    boolean existsByEventIdAndUserId(Long eventId, Long userId);
+    List<Registration> findByEvent(Event event);
     List<Registration> findByUserId(Long userId);
+    Optional<Registration> findByEventIdAndUserId(Long eventId, Long userId);
     Page<Registration> findByUserId(Long userId, Pageable pageable);
+    boolean existsByEventIdAndUserId(Long eventId, Long userId);
     boolean findByUserIdAndEventId(Long userId, Long eventId);
     boolean existsByUserAndEvent(User user, Event event);
 

@@ -38,22 +38,14 @@ public class OrganizerApplicationController {
             @ApiResponse(responseCode = "400", description = "Already applied")
     })
     @PostMapping
-    public ResponseEntity<OrganizerApplication> apply(@RequestBody OrganizerApplication request,
-                                                      @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<OrganizerApplicationDTO> apply(
+            @RequestBody OrganizerApplicationRequestDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        //  Load user from DB
-        User currentUser = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (appRepository.existsByUser(currentUser)) {
-            throw new RuntimeException("You have already applied to become an organizer.");
-        }
-        // Set required fields
-        request.setUser(currentUser);
-        request.setAppliedAt(LocalDateTime.now());
-        request.setStatus(OrganizerApplicationStatus.PENDING);
+        OrganizerApplicationDTO response =
+                organizerApplicationService.createApplication(dto, userDetails.getUsername());
 
-        OrganizerApplication saved = appRepository.save(request);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 

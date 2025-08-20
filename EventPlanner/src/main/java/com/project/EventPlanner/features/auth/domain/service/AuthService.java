@@ -35,6 +35,7 @@ public class AuthService {
     private final UserService userService;
     private final JwtUtil jwtUtil; // your JWT helper class
     private final AuthenticationManager authenticationManager;
+    private final RoleRepository roleRepo;
 
     public void registerRequest(UserRegisterDto dto) {
         if (userRepo.existsByEmail(dto.getEmail()) || userRepo.existsByUsername(dto.getUsername())) {
@@ -93,10 +94,10 @@ public class AuthService {
     }
 
     private Role defaultUserRole() {
-        Role role = new Role();
-        role.setId(2L); // for example, ROLE_USER id
-        return role;
+        return roleRepo.findById(2L) // or findByName("USER")
+                .orElseThrow(() -> new RuntimeException("Default USER role not found"));
     }
+
 
 
     public AuthResponse login(AuthRequest request) {

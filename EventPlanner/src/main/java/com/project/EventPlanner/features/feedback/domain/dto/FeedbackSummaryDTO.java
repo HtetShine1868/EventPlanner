@@ -7,6 +7,8 @@ public class FeedbackSummaryDTO {
     private int positiveCount;
     private int neutralCount;
     private int negativeCount;
-
-    // Constructor, Getters, Setters
+    private double positivePercent;
+    private double neutralPercent;
+    private double negativePercent;
 }
+

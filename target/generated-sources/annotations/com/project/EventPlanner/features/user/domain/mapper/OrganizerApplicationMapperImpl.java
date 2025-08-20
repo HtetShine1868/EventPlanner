@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-08-18T01:07:16+0630",
+    date = "2025-08-18T20:43:28+0630",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.3 (Oracle Corporation)"
 )
 @Component
@@ -28,6 +28,8 @@ public class OrganizerApplicationMapperImpl implements OrganizerApplicationMappe
         organizerApplicationDTO.setUserId( applicationUserId( application ) );
         organizerApplicationDTO.setId( application.getId() );
         organizerApplicationDTO.setOrganizerName( application.getOrganizerName() );
+        organizerApplicationDTO.setEmail( application.getEmail() );
+        organizerApplicationDTO.setDescription( application.getDescription() );
         organizerApplicationDTO.setStatus( application.getStatus() );
         organizerApplicationDTO.setAppliedAt( application.getAppliedAt() );
 
@@ -43,6 +45,8 @@ public class OrganizerApplicationMapperImpl implements OrganizerApplicationMappe
         OrganizerApplication organizerApplication = new OrganizerApplication();
 
         organizerApplication.setOrganizerName( dto.getOrganizerName() );
+        organizerApplication.setDescription( dto.getDescription() );
+        organizerApplication.setEmail( dto.getEmail() );
 
         return organizerApplication;
     }
