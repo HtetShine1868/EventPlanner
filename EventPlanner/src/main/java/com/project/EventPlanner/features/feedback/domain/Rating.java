@@ -1,4 +1,6 @@
 package com.project.EventPlanner.features.feedback.domain;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Rating {
     ONE(1),
@@ -13,7 +15,25 @@ public enum Rating {
         this.value = value;
     }
 
-    public int getNumericValue() {
-        return value;
+    @JsonValue
+    public int getValue() {
+        return value; // Jackson uses this for serialization
+    }
+
+    // Accept numbers or enum names for deserialization
+    @JsonCreator
+    public static Rating fromValue(Object value) {
+        if (value instanceof Number) {
+            int intValue = ((Number) value).intValue();
+            for (Rating r : Rating.values()) {
+                if (r.value == intValue) return r;
+            }
+        } else if (value instanceof String) {
+            try {
+                return Rating.valueOf(((String) value).toUpperCase());
+            } catch (IllegalArgumentException ignored) {}
+        }
+        throw new IllegalArgumentException("Invalid rating value: " + value);
     }
 }
+

@@ -104,7 +104,7 @@ public class FeedbackService {
 
         int total = feedbacks.size();
         double avgRating = feedbacks.stream()
-                .mapToInt(f -> f.getRating().getNumericValue()) // convert enum to number
+                .mapToInt(f -> f.getRating().getValue()) // convert enum to number
                 .average()
                 .orElse(0.0);
 
@@ -134,6 +134,14 @@ public class FeedbackService {
         int total = feedbacks.size();
         int positive = 0, neutral = 0, negative = 0;
 
+        double avgRating = 0;
+        if (!feedbacks.isEmpty()) {
+            avgRating = feedbacks.stream()
+                    .mapToInt(f -> f.getRating().getValue())
+                    .average()
+                    .orElse(0.0);
+        }
+
         for (Feedback f : feedbacks) {
             switch (f.getSentiment()) {
                 case POSITIVE -> positive++;
@@ -143,6 +151,7 @@ public class FeedbackService {
         }
 
         FeedbackSummaryDTO summary = new FeedbackSummaryDTO();
+        summary.setAverageRating(avgRating);
         summary.setPositiveCount(positive);
         summary.setNeutralCount(neutral);
         summary.setNegativeCount(negative);
