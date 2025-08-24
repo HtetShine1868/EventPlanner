@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
                 @ApiResponse(responseCode = "401", description = "Invalid credentials")
         })
         @PostMapping("/login")
-        public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-            AuthResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
+        public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+            return authService.login(request);
         }
+
 
 
         @PostMapping("/register-request")

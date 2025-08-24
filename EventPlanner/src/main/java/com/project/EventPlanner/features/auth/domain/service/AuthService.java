@@ -12,19 +12,26 @@ import com.project.EventPlanner.features.user.domain.repository.PendingUserRepos
 import com.project.EventPlanner.features.user.domain.repository.RoleRepository;
 import com.project.EventPlanner.features.user.domain.repository.UserRepository;
 import com.project.EventPlanner.features.user.domain.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthService {
 
 
@@ -41,6 +48,9 @@ public class AuthService {
         if (userRepo.existsByEmail(dto.getEmail()) || userRepo.existsByUsername(dto.getUsername())) {
             throw new RuntimeException("Email or username already taken");
         }
+
+        // Remove old pending registrations for this email
+        pendingUserRepo.deleteByEmail(dto.getEmail());
 
         String otp = String.valueOf(new Random().nextInt(900000) + 100000);
 
@@ -65,8 +75,9 @@ public class AuthService {
     }
 
     // Step 2: Verify OTP → create User
+    @Transactional
     public AuthResponse verifyEmail(VerifyEmailDTO dto) {
-        PendingUser pending = pendingUserRepo.findByEmail(dto.getEmail())
+        PendingUser pending = pendingUserRepo.findTopByEmailOrderByExpiryDateDesc(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("No pending registration found"));
 
         if (!pending.getOtpCode().equals(dto.getCode()) ||
@@ -100,15 +111,40 @@ public class AuthService {
 
 
 
-    public AuthResponse login(AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+    public ResponseEntity<?> login(AuthRequest request) {
+        try {
+            // Keep your original authentication logic unchanged
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        User user = userService.loadUserByUsername(request.getUsername());
+            User user = userService.loadUserByUsername(request.getUsername());
 
-        // ✅ Generate token using full user (includes role claim)
-        String token = jwtUtil.generateToken(user);
+            String token = jwtUtil.generateToken(user);
 
-        return new AuthResponse(token);
+            // Return token as before
+            return ResponseEntity.ok(new AuthResponse(token));
+
+        } catch (UsernameNotFoundException ex) {
+            // Specific error message
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                            "error", "Login failed",
+                            "details", "Username not found"
+                    ));
+        } catch (BadCredentialsException ex) {
+            // Specific error message
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(
+                            "error", "Login failed",
+                            "details", "Incorrect password"
+                    ));
+        } catch (Exception ex) {
+            // Catch-all for any other errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Something went wrong",
+                            "details", ex.getMessage()
+                    ));
+        }
     }
 }

@@ -3,8 +3,10 @@ package com.project.EventPlanner.features.event.api;
 import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.*;
+import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.event.domain.service.EventService;
+import com.project.EventPlanner.features.event.domain.service.RecommendationService;
 import com.project.EventPlanner.features.registration.domain.dto.EventAnalysisDTO;
 import com.project.EventPlanner.features.registration.domain.service.RegistrationService;
 import com.project.EventPlanner.features.user.domain.model.OrganizerApplication;
@@ -38,6 +40,8 @@ public class EventController {
     private final OrganizerApplicationRepository organizerApplicationRepository;
     private final EventMapper eventMapper;
     private final RegistrationService registrationService;
+    private final RecommendationService recommendationService;
+
 
     @Operation(summary = "Create event", description = "Organizer creates a new event,and become a pending event at first and after the admin approve it become shown and register by user")
     @PostMapping
@@ -121,19 +125,13 @@ public class EventController {
     @Operation(summary = "Trending events", description = "Get top trending events, optionally filtered by category")
     @GetMapping("/trending")
     public ResponseEntity<List<EventResponseDto>> getTrendingEvents(
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(defaultValue = "5") int limit  // default top 5
-    ) {
-        List<EventResponseDto> events;
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) Long categoryId) {
 
-        if (categoryId != null) {
-            events = eventService.getTopTrendingEventsByCategory(categoryId, limit);
-        } else {
-            events = eventService.getTopTrendingEvents(limit);
-        }
-
-        return ResponseEntity.ok(events);
+        List<EventResponseDto> trendingEvents = eventService.getTopTrendingEvents(limit);
+        return ResponseEntity.ok(trendingEvents);
     }
+
 
 
 
@@ -186,5 +184,15 @@ public class EventController {
     public ResponseEntity<EventAnalysisDTO> getSimpleAnalysis(@PathVariable Long eventId) {
         EventAnalysisDTO dto = registrationService.getSimpleAnalysis(eventId);
         return ResponseEntity.ok(dto);
+    }
+
+
+    @GetMapping("/recommendations/{userId}")
+    public ResponseEntity<List<EventDTO>> getRecommendations(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        List<EventDTO> recommendedEvents = recommendationService.recommendEvents(userId, limit);
+        return ResponseEntity.ok(recommendedEvents);
     }
 }

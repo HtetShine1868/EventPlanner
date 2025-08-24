@@ -1,6 +1,7 @@
 package com.project.EventPlanner.features.admin.domain.service;
 
 import com.project.EventPlanner.common.enums.OrganizerApplicationStatus;
+import com.project.EventPlanner.features.admin.domain.dto.DashboardStatsDTO;
 import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
@@ -80,5 +81,34 @@ public class AdminService {
                 .stream()
                 .map(eventMapper::toDto)
                 .toList();
+    }
+    public DashboardStatsDTO getDashboardStatistics() {
+        long totalEvents = eventRepository.count();
+        long pendingEvents = eventRepository.countByStatus(EventStatus.PENDING);
+        long approvedEvents = eventRepository.countByStatus(EventStatus.APPROVED);
+        long totalAttendees = eventRepository.sumAttendees();
+
+        return DashboardStatsDTO.builder()
+                .totalEvents(totalEvents)
+                .pendingReview(pendingEvents)
+                .approved(approvedEvents)
+                .totalAttendees(totalAttendees)
+                .build();
+    }
+
+    public Long getTotalEventsCount() {
+        return eventRepository.count();
+    }
+
+    public Long getPendingEventsCount() {
+        return eventRepository.countByStatus(EventStatus.PENDING);
+    }
+
+    public Long getApprovedEventsCount() {
+        return eventRepository.countByStatus(EventStatus.APPROVED);
+    }
+
+    public Long getTotalAttendeesCount() {
+        return eventRepository.sumAttendees();
     }
 }

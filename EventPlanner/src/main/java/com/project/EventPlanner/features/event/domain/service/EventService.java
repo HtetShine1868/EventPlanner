@@ -47,6 +47,9 @@ public class EventService {
     private final OrganizerApplicationRepository organizerApplicationRepository;
 
     public EventResponseDto createEvent(EventRequestDto eventRequestDto,  User currentUser) {
+        if (eventRequestDto.getEndTime().isBefore(eventRequestDto.getStartTime())) {
+            throw new IllegalArgumentException("End time cannot be earlier than start time.");
+        }
         Event event = eventMapper.toEntity(eventRequestDto);
         // Set category
         event.setCategory(

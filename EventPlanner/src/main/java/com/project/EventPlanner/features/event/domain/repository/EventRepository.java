@@ -2,6 +2,7 @@ package com.project.EventPlanner.features.event.domain.repository;
 
 import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.model.Event;
+import com.project.EventPlanner.features.event.domain.model.EventCategory;
 import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import java.rmi.registry.LocateRegistry;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface EventRepository extends
         JpaRepository<Event, Long>,
@@ -25,6 +27,15 @@ public interface EventRepository extends
         List<Event> findByStatus(EventStatus status);
         List<Event> findByCreatedById(Long organizerId);
         List<Event> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
+
+        List<Event> findByCategoryInAndIdNotIn(Set<EventCategory> categories, Set<Long> excludedIds);
+
+        List<Event> findByCategoryInAndIdNotInAndStartTimeAfter(
+                Set<EventCategory> categories,
+                Set<Long> excludedIds,
+                LocalDateTime startTime
+        );
+        List<Event> findByStartTimeAfter(LocalDateTime startTime);
 
         Page<Event> findByOrganizerIdOrderByStartTimeDesc(Long organizerId, Pageable pageable);
         Page<Event> findByStatus(EventStatus status, Pageable pageable);
@@ -37,8 +48,17 @@ public interface EventRepository extends
 
         Page<Event> findByLocationContainingIgnoreCaseAndStatus(String location, EventStatus status, Pageable pageable);
 
+        Page<Event> findByCategoryIdOrderByRegisteredCountDesc(Long categoryId, Pageable pageable);
 
+        Page<Event> findAllByOrderByRegisteredCountDesc(Pageable pageable);
         Optional<Event> findById(Long id);
+        Long countByStatus(EventStatus status);
+
+        // Use correct method name for sum
+        @Query("SELECT COALESCE(SUM(e.registeredCount), 0) FROM Event e")
+        Long sumAttendees();
+        @Query("SELECT COALESCE(SUM(e.registeredCount), 0) FROM Event e WHERE e.status = 'APPROVED'")
+        Long getTotalAttendeesForApprovedEvents();
 
         @Query("""
 SELECT e FROM Event e

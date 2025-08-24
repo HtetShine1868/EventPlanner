@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface PendingUserRepository extends JpaRepository<PendingUser, Long> {
     Optional<PendingUser> findByEmail(String email);
+    void deleteByEmail(String email);
+    Optional<PendingUser> findTopByEmailOrderByExpiryDateDesc(String email);
 }
