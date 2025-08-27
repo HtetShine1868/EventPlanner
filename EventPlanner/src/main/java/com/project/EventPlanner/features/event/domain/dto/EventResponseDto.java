@@ -27,6 +27,7 @@ public class EventResponseDto {
     private EventStatus status;
     private String categoryName;
     private String organizerUsername;
+    private String feedback;
 
     public static EventResponseDto fromEntity(Event event) {
         return EventResponseDto.builder()

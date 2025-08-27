@@ -22,5 +22,6 @@ public interface EventMapper {
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "organizerUsername", source = "organizer.username")
     @Mapping(target = "registeredCount", expression = "java(event.getRegistrations() != null ? event.getRegistrations().size() : 0)")
+    @Mapping(source = "feedback", target = "feedback")
     EventResponseDto toDto(Event event);
 }

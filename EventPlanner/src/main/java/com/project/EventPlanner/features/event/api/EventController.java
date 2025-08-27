@@ -124,16 +124,22 @@ public class EventController {
 
     @Operation(summary = "Trending events", description = "Get top trending events, optionally filtered by category")
     @GetMapping("/trending")
-    public ResponseEntity<List<EventResponseDto>> getTrendingEvents(
-            @RequestParam(defaultValue = "10") int limit,
+    public ResponseEntity<Page<EventResponseDto>> getTrendingEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Long categoryId) {
 
-        List<EventResponseDto> trendingEvents = eventService.getTopTrendingEvents(limit);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EventResponseDto> trendingEvents;
+
+        if (categoryId != null) {
+            trendingEvents = eventService.getTrendingEventsByCategory(categoryId, pageable);
+        } else {
+            trendingEvents = eventService.getTrendingEvents(pageable);
+        }
+
         return ResponseEntity.ok(trendingEvents);
     }
-
-
-
 
     @Operation(summary = "Age analysis", description = "Get age distribution of registered users for organizer's events")
     @PreAuthorize("hasAuthority('ORGANIZER')")

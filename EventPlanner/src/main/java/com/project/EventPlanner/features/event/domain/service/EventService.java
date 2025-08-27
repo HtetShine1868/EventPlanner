@@ -61,8 +61,6 @@ public class EventService {
         event.setOrganizer( currentUser);
         List<Event> conflicts = eventRepository.findConflictingEvents(
                 event.getLocation(),
-                event.getLatitude(),
-                event.getLongitude(),
                 event.getStartTime(),
                 event.getEndTime()
         );
@@ -120,8 +118,7 @@ public class EventService {
         //  Conflict check (exclude current event's ID)
         List<Event> conflicts = eventRepository.findConflictingEventsExcludingSelf(
                 updatedEvent.getLocation(),
-                updatedEvent.getLatitude(),
-                updatedEvent.getLongitude(),
+
                 updatedEvent.getStartTime(),
                 updatedEvent.getEndTime(),
                 id
@@ -201,18 +198,14 @@ public class EventService {
         return filteredEvents.map(eventMapper::toDto);
     }
 
-    public List<EventResponseDto> getTopTrendingEvents(int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        return eventRepository.findTopTrendingEvents(pageable)
-                .stream().map(event -> modelMapper.map(event, EventResponseDto.class))
-                .collect(Collectors.toList());
+    public Page<EventResponseDto> getTrendingEvents(Pageable pageable) {
+        Page<Event> eventsPage = eventRepository.findTrendingEvents(pageable);
+        return eventsPage.map(event -> modelMapper.map(event, EventResponseDto.class));
     }
 
-    public List<EventResponseDto> getTopTrendingEventsByCategory(Long categoryId, int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        return eventRepository.findTopTrendingEventsByCategory(categoryId, pageable)
-                .stream().map(event -> modelMapper.map(event, EventResponseDto.class))
-                .collect(Collectors.toList());
+    public Page<EventResponseDto> getTrendingEventsByCategory(Long categoryId, Pageable pageable) {
+        Page<Event> eventsPage = eventRepository.findTrendingEventsByCategory(categoryId, pageable);
+        return eventsPage.map(event -> modelMapper.map(event, EventResponseDto.class));
     }
 
     public EventResponseDto getMostRegisteredEvent(Long organizerId) {

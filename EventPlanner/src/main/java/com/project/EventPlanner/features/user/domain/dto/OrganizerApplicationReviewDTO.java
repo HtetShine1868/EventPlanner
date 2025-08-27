@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class OrganizerApplicationReviewDTO {
     private Long applicationId;
-    private OrganizerApplicationStatus decision; // in Review DTO
+    private OrganizerApplicationStatus decision;
+    private String feedback;// in Review DTO
 
 }

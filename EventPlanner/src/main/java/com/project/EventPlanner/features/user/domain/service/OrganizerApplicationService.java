@@ -30,9 +30,14 @@ public class OrganizerApplicationService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check if already applied
-        if (appRepository.existsByUser(user)) {
-            throw new RuntimeException("You have already applied to become an organizer.");
+        // Check if user has a pending or approved application
+        boolean hasActiveApplication = appRepository.existsByUserAndStatusIn(
+                user,
+                List.of(OrganizerApplicationStatus.PENDING, OrganizerApplicationStatus.APPROVED)
+        );
+
+        if (hasActiveApplication) {
+            throw new RuntimeException("You already have an active organizer application.");
         }
 
         // Map DTO -> Entity
@@ -43,10 +48,15 @@ public class OrganizerApplicationService {
         application.setOrganizerName(dto.getOrganizerName());
         application.setEmail(dto.getEmail());
         application.setDescription(dto.getDescription());
+        application.setFeedback(null);
+
+        // Clear feedback for new application
+        application.setFeedback(null);
 
         OrganizerApplication savedApp = appRepository.save(application);
         return mapper.toDTO(savedApp);
     }
+
 
 
     public OrganizerApplicationDTO getById(Long id) {

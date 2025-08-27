@@ -63,51 +63,45 @@ public interface EventRepository extends
         @Query("""
 SELECT e FROM Event e
 WHERE e.location = :location
-AND e.latitude = :latitude
-AND e.longitude = :longitude
 AND (
-    (:startTime BETWEEN e.startTime AND e.endTime) OR
-    (:endTime BETWEEN e.startTime AND e.endTime) OR
-    (e.startTime BETWEEN :startTime AND :endTime)
+    (:startTime >= e.startTime AND :startTime < e.endTime) OR
+    (:endTime > e.startTime AND :endTime <= e.endTime) OR
+    (e.startTime >= :startTime AND e.startTime < :endTime) OR
+    (e.endTime > :startTime AND e.endTime <= :endTime)
 )
 AND (e.status = 'APPROVED' OR e.status = 'PENDING')
 
 """)
         List<Event> findConflictingEvents(
                 String location,
-                Double latitude,
-                Double longitude,
                 LocalDateTime startTime,
                 LocalDateTime endTime
         );
 
         @Query("""
 SELECT e FROM Event e
-WHERE e.id <> :excludeId
-AND e.location = :location
-AND e.latitude = :latitude
-AND e.longitude = :longitude
+WHERE e.location = :location
+AND e.id <> :excludeId
 AND (
-    (:startTime BETWEEN e.startTime AND e.endTime) OR
-    (:endTime BETWEEN e.startTime AND e.endTime) OR
-    (e.startTime BETWEEN :startTime AND :endTime)
+    (:startTime >= e.startTime AND :startTime < e.endTime) OR
+    (:endTime > e.startTime AND :endTime <= e.endTime) OR
+    (e.startTime >= :startTime AND e.startTime < :endTime) OR
+    (e.endTime > :startTime AND e.endTime <= :endTime)
 )
 AND (e.status = 'APPROVED' OR e.status = 'PENDING')
 """)
         List<Event> findConflictingEventsExcludingSelf(
                 String location,
-                Double latitude,
-                Double longitude,
                 LocalDateTime startTime,
                 LocalDateTime endTime,
                 Long excludeId
         );
+
         @Query("SELECT e FROM Event e WHERE e.status = 'APPROVED' ORDER BY SIZE(e.registrations) DESC, e.startTime ASC")
-        List<Event> findTopTrendingEvents(Pageable pageable);
+        Page<Event> findTrendingEvents(Pageable pageable);
 
-        @Query("SELECT e FROM Event e WHERE e.status = 'APPROVED' AND e.category.id = :categoryId ORDER BY SIZE(e.registrations) DESC, e.startTime ASC")
-        List<Event> findTopTrendingEventsByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
-
+        @Query("SELECT e FROM Event e WHERE e.category.id = :categoryId AND e.status = 'APPROVED' ORDER BY SIZE(e.registrations) DESC, e.startTime ASC")
+        Page<Event> findTrendingEventsByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
         @Query("""
     SELECT e FROM Event e
     WHERE e.createdBy.id = :organizerId

@@ -30,6 +30,9 @@ public class OrganizerApplication {
 
     private String email;
 
+    @Column(length = 1000) // allow longer feedback
+    private String feedback;
+
     @Enumerated(EnumType.STRING)
     private OrganizerApplicationStatus status = OrganizerApplicationStatus.PENDING;
 

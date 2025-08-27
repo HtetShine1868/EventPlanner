@@ -5,6 +5,7 @@ import com.project.EventPlanner.features.admin.domain.service.AdminService;
 import com.project.EventPlanner.features.event.domain.EventStatus;
 import com.project.EventPlanner.features.event.domain.Mapper.EventMapper;
 import com.project.EventPlanner.features.event.domain.dto.EventResponseDto;
+import com.project.EventPlanner.features.event.domain.dto.EventReviewDTO;
 import com.project.EventPlanner.features.event.domain.model.Event;
 import com.project.EventPlanner.features.event.domain.repository.EventRepository;
 import com.project.EventPlanner.features.event.domain.service.EventService;
@@ -29,11 +30,7 @@ public class AdminController {
     private final EventMapper eventMapper;
 
 
-    //Organizer-application
-    @Operation(summary = "Review organizer application", description = "Approve or reject organizer application")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Application reviewed")
-    })
+    // Review organizer application already has feedback in DTO
     @PostMapping("/organizer-application/review")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<OrganizerApplicationDTO> review(
@@ -54,20 +51,25 @@ public class AdminController {
 
     //EventCrud
 
-    @Operation(summary = "Approve event", description = "Admin approves event")
+    // Approve event with feedback
     @PutMapping("/{eventId}/approve")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<EventResponseDto> approveEvent(@PathVariable Long eventId) {
-        return ResponseEntity.ok(adminService.approveEvent(eventId));
+    public ResponseEntity<EventResponseDto> approveEvent(
+            @PathVariable Long eventId,
+            @RequestBody EventReviewDTO dto
+    ) {
+        return ResponseEntity.ok(adminService.approveEvent(eventId, dto.getFeedback()));
     }
 
-    @Operation(summary = "Reject event", description = "Admin rejects event")
+    // Reject event with feedback
     @PutMapping("/{eventId}/reject")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<EventResponseDto> rejectEvent(@PathVariable Long eventId) {
-        return ResponseEntity.ok(adminService.rejectEvent(eventId));
+    public ResponseEntity<EventResponseDto> rejectEvent(
+            @PathVariable Long eventId,
+            @RequestBody EventReviewDTO dto
+    ) {
+        return ResponseEntity.ok(adminService.rejectEvent(eventId, dto.getFeedback()));
     }
-
     @Operation(summary = "Get pending events", description = "Returns all pending events")
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('ADMIN')")

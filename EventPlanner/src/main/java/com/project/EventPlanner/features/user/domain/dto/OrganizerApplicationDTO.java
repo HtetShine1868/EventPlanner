@@ -14,5 +14,6 @@ public class OrganizerApplicationDTO {
     private String description;
     private OrganizerApplicationStatus status;
     private LocalDateTime appliedAt;
+    private String feedback;
 }
 

@@ -15,5 +15,10 @@ public interface OrganizerApplicationRepository extends JpaRepository<OrganizerA
     List<OrganizerApplication> findByStatus(OrganizerApplicationStatus status);
 
     Boolean existsByUser(User user);
+    boolean existsByUserAndStatusIn(User user, List<OrganizerApplicationStatus> statuses);
+    Optional<OrganizerApplication> findFirstByUserAndStatusOrderByAppliedAtDesc(
+            User user, OrganizerApplicationStatus status
+    );
+
 
 }

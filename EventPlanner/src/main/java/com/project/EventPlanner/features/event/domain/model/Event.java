@@ -56,12 +56,22 @@ public class Event {
     private User createdBy;
 
     private Integer registeredCount;
+
+    @Column(length = 1000)
+    private String feedback;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Registration> registrations = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EventStatus status = EventStatus.PENDING;
 
+    public String getFeedback() {
+        return feedback;
+    }
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
 
 }
 

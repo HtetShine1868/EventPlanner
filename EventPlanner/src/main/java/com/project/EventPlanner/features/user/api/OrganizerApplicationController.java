@@ -21,7 +21,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/organizer-applications")
@@ -35,18 +38,36 @@ public class OrganizerApplicationController {
     @Operation(summary = "Apply to become organizer", description = "User submits organizer application to become the organizer")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Application submitted"),
-            @ApiResponse(responseCode = "400", description = "Already applied")
+            @ApiResponse(responseCode = "400", description = "Already has an active application")
     })
     @PostMapping
-    public ResponseEntity<OrganizerApplicationDTO> apply(
+    public ResponseEntity<?> apply(
             @RequestBody OrganizerApplicationRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        OrganizerApplicationDTO response =
-                organizerApplicationService.createApplication(dto, userDetails.getUsername());
+        try {
+            OrganizerApplicationDTO response =
+                    organizerApplicationService.createApplication(dto, userDetails.getUsername());
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+            // Optional: fetch previous rejected feedback to return
+            User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+            Optional<OrganizerApplication> lastRejected =
+                    appRepository.findFirstByUserAndStatusOrderByAppliedAtDesc(user, OrganizerApplicationStatus.REJECTED);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("application", response);
+            lastRejected.ifPresent(app -> result.put("lastRejectedFeedback", app.getFeedback()));
+
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
+
+
 
 
     @Operation(summary = "Get application by ID", description = "Fetch a specific organizer application")
